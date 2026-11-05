@@ -1,0 +1,17 @@
+.gradle/
+build/
+local.properties
+CLAUDE.local.md
+install.local.bat
+.idea/
+*.iml
+.DS_Store
+captures/
+.kotlin/
+~$*
+
+# Michael's own workout history stays on his PC (the repo is public)
+app/src/main/assets/history.json
+*.xlsx
+web/sessions.json
+web/seed.py

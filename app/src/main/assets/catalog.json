@@ -1,0 +1,768 @@
+{
+ "areas": [
+  {
+   "id": "chest",
+   "label": "Chest",
+   "target": 4,
+   "kind": "strength"
+  },
+  {
+   "id": "back",
+   "label": "Back",
+   "target": 4,
+   "kind": "strength"
+  },
+  {
+   "id": "shoulders",
+   "label": "Shoulders",
+   "target": 4,
+   "kind": "strength"
+  },
+  {
+   "id": "arms",
+   "label": "Arms",
+   "target": 5,
+   "kind": "strength"
+  },
+  {
+   "id": "legs",
+   "label": "Legs",
+   "target": 4,
+   "kind": "strength"
+  },
+  {
+   "id": "glutes",
+   "label": "Glutes & Hamstrings",
+   "target": 4,
+   "kind": "strength"
+  },
+  {
+   "id": "core",
+   "label": "Core",
+   "target": 3,
+   "kind": "strength"
+  },
+  {
+   "id": "conditioning",
+   "label": "Conditioning",
+   "target": 3,
+   "kind": "conditioning"
+  },
+  {
+   "id": "mobility",
+   "label": "Mobility",
+   "target": 2,
+   "kind": "mobility"
+  }
+ ],
+ "exercises": [
+  {
+   "id": "bench-press",
+   "name": "Bench press",
+   "areas": [
+    "chest",
+    "arms"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "incline-press",
+   "name": "Incline press",
+   "areas": [
+    "chest",
+    "shoulders"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "flys",
+   "name": "Flys",
+   "areas": [
+    "chest"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "single-arm-pushup",
+   "name": "Single-arm pushups",
+   "areas": [
+    "chest",
+    "core"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "cable-chest",
+   "name": "Cable chest press",
+   "areas": [
+    "chest"
+   ],
+   "equip": "Bosu / cable"
+  },
+  {
+   "id": "bent-row",
+   "name": "Bent-over rows",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "incline-row",
+   "name": "Incline rows",
+   "areas": [
+    "back"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "reverse-fly",
+   "name": "Reverse flys",
+   "areas": [
+    "back",
+    "shoulders"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "cable-pull",
+   "name": "Cable pulls",
+   "areas": [
+    "back"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "upper-back-pull",
+   "name": "Upper back pulls",
+   "areas": [
+    "back"
+   ],
+   "equip": "Bosu / cable"
+  },
+  {
+   "id": "straight-arm-pulldown",
+   "name": "Straight-arm pulldown",
+   "areas": [
+    "back"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "dead-hang",
+   "name": "Dead hang",
+   "areas": [
+    "back",
+    "shoulders"
+   ],
+   "equip": "Bar"
+  },
+  {
+   "id": "shrugs",
+   "name": "Shrugs",
+   "areas": [
+    "back"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "shoulder-press",
+   "name": "Shoulder press",
+   "areas": [
+    "shoulders",
+    "arms"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "shoulder-raise",
+   "name": "Shoulder raises",
+   "areas": [
+    "shoulders"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "band-shoulders",
+   "name": "Band shoulder work",
+   "areas": [
+    "shoulders"
+   ],
+   "equip": "Bands"
+  },
+  {
+   "id": "xc-shoulders",
+   "name": "Crosscore shoulders",
+   "areas": [
+    "shoulders"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "kb-halo",
+   "name": "KB halos",
+   "areas": [
+    "shoulders",
+    "core"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "curls",
+   "name": "Curls",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "hammer-curls",
+   "name": "Hammer curls",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "xc-curl-forehead",
+   "name": "Curl to forehead",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "tricep-ext",
+   "name": "Tricep extensions",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "overhead-tri",
+   "name": "Overhead tricep extensions",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "sumo-squat",
+   "name": "Sumo squats",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "bosu-squat",
+   "name": "Bosu squats",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Bosu"
+  },
+  {
+   "id": "bosu-goblet-squat",
+   "name": "Bosu goblet squats",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Bosu"
+  },
+  {
+   "id": "bosu-split-squat",
+   "name": "Bosu split squats",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Bosu"
+  },
+  {
+   "id": "xc-split-squat",
+   "name": "Crosscore split squats",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "xc-cross-leg-squat",
+   "name": "Crosscore cross-leg squat",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "box-step-up",
+   "name": "Box step-ups",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Box"
+  },
+  {
+   "id": "box-jump",
+   "name": "Box jumps",
+   "areas": [
+    "legs",
+    "conditioning"
+   ],
+   "equip": "Box"
+  },
+  {
+   "id": "rear-lunge",
+   "name": "Rear lunges",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "side-lunge",
+   "name": "Side lunges",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "calf-raise",
+   "name": "Calf raises",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "leg-ext",
+   "name": "Leg extensions",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Ankle weights"
+  },
+  {
+   "id": "adduction",
+   "name": "Groin / adduction",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Ankle weights"
+  },
+  {
+   "id": "sl-front",
+   "name": "Single-leg reach: front",
+   "areas": [
+    "legs",
+    "core"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "sl-back",
+   "name": "Single-leg reach: back",
+   "areas": [
+    "legs",
+    "core"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "sl-side",
+   "name": "Single-leg reach: side",
+   "areas": [
+    "legs",
+    "core"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "sl-curtsey",
+   "name": "Single-leg reach: curtsey",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "sl-stand",
+   "name": "Single-leg stands",
+   "areas": [
+    "legs",
+    "core"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "step-over",
+   "name": "Step-overs",
+   "areas": [
+    "legs",
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "rdl",
+   "name": "RDLs",
+   "areas": [
+    "glutes",
+    "back"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "sl-rdl",
+   "name": "Single-leg RDLs",
+   "areas": [
+    "glutes",
+    "legs"
+   ],
+   "equip": "Dumbbells"
+  },
+  {
+   "id": "hip-thrust",
+   "name": "Hip thrusts",
+   "areas": [
+    "glutes"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "sl-glute-bridge",
+   "name": "Single-leg glute bridge",
+   "areas": [
+    "glutes"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "ball-ham-curl",
+   "name": "Yoga ball hamstring curls",
+   "areas": [
+    "glutes",
+    "core"
+   ],
+   "equip": "Yoga ball"
+  },
+  {
+   "id": "glute-kickback",
+   "name": "Glute kickbacks",
+   "areas": [
+    "glutes"
+   ],
+   "equip": "Ankle weights"
+  },
+  {
+   "id": "glute-lunge-hold",
+   "name": "Glute lunge hold",
+   "areas": [
+    "glutes",
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "ab-wheel",
+   "name": "Ab wheel",
+   "areas": [
+    "core"
+   ],
+   "equip": "Ab wheel"
+  },
+  {
+   "id": "bosu-crunch",
+   "name": "Bosu crunches",
+   "areas": [
+    "core"
+   ],
+   "equip": "Bosu"
+  },
+  {
+   "id": "hanging-core",
+   "name": "Hanging core",
+   "areas": [
+    "core",
+    "back"
+   ],
+   "equip": "Bar"
+  },
+  {
+   "id": "l-sit",
+   "name": "L-sit",
+   "areas": [
+    "core"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "xc-core",
+   "name": "Crosscore core",
+   "areas": [
+    "core"
+   ],
+   "equip": "Crosscore"
+  },
+  {
+   "id": "kb-oblique",
+   "name": "KB obliques (side bends)",
+   "areas": [
+    "core"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "suitcase-carry",
+   "name": "Suitcase carry",
+   "areas": [
+    "core",
+    "back"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "superman",
+   "name": "Superman",
+   "areas": [
+    "core",
+    "back"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "kb-swing",
+   "name": "KB swing (two-hand)",
+   "areas": [
+    "conditioning",
+    "glutes"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "kb-1h-swing",
+   "name": "KB one-hand swing",
+   "areas": [
+    "conditioning",
+    "glutes"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "kb-oh-swing",
+   "name": "KB overhead swing",
+   "areas": [
+    "conditioning",
+    "shoulders"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "kb-clean-press",
+   "name": "KB clean & press",
+   "areas": [
+    "conditioning",
+    "shoulders",
+    "legs"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "kb-snatch",
+   "name": "KB snatch",
+   "areas": [
+    "conditioning",
+    "shoulders",
+    "glutes"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "kb-getup",
+   "name": "KB stand-up (get-up)",
+   "areas": [
+    "core",
+    "shoulders"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "kb-pistol-draw",
+   "name": "KB pistol draw",
+   "areas": [
+    "conditioning",
+    "shoulders"
+   ],
+   "equip": "Kettlebell"
+  },
+  {
+   "id": "slam-ball",
+   "name": "Slam balls",
+   "areas": [
+    "conditioning",
+    "core"
+   ],
+   "equip": "Slam ball"
+  },
+  {
+   "id": "rowing",
+   "name": "Rowing machine",
+   "areas": [
+    "conditioning",
+    "back"
+   ],
+   "equip": "Rower"
+  },
+  {
+   "id": "heavy-bag",
+   "name": "Heavy bag",
+   "areas": [
+    "conditioning",
+    "shoulders"
+   ],
+   "equip": "Heavy bag"
+  },
+  {
+   "id": "paddle",
+   "name": "Paddle",
+   "areas": [
+    "conditioning"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "walk",
+   "name": "Walk",
+   "areas": [
+    "conditioning"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "asian-squat",
+   "name": "Asian squats",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "90-90",
+   "name": "90-90",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "cossack",
+   "name": "Cossack stretch",
+   "areas": [
+    "mobility",
+    "legs"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "leg-under",
+   "name": "Leg-under move",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "horse-stance",
+   "name": "Horse stance",
+   "areas": [
+    "mobility",
+    "legs"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "down-dog",
+   "name": "Downward dog",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "hold-lunge",
+   "name": "Hold lunge",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "hip-openers",
+   "name": "Hip openers",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Ankle weights"
+  },
+  {
+   "id": "hip-flexor",
+   "name": "Hip flexor stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "shoulder-mobility",
+   "name": "Shoulder mobility",
+   "areas": [
+    "mobility",
+    "shoulders"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "glute-stretch",
+   "name": "Glute stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "active-reach",
+   "name": "Active reach",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "side-split",
+   "name": "Side split",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  },
+  {
+   "id": "stretch",
+   "name": "General stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": ""
+  }
+ ]
+}

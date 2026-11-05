@@ -1,0 +1,223 @@
+package com.laurio.workoutlog.ui
+
+import android.app.Application
+import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.laurio.workoutlog.data.AppData
+import com.laurio.workoutlog.data.Exercise
+import com.laurio.workoutlog.data.Item
+import com.laurio.workoutlog.data.Session
+import com.laurio.workoutlog.data.SetGroup
+import com.laurio.workoutlog.data.Store
+import com.laurio.workoutlog.logic.formatWeight
+import com.laurio.workoutlog.logic.prettyDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.time.LocalDate
+
+/** One sets/reps/weight line being typed in. Kept as text so the fields edit naturally. */
+data class GroupDraft(val sets: String = "", val reps: String = "", val weight: String = "") {
+    fun toGroup() = SetGroup(sets.trim().toIntOrNull(), reps.trim().toIntOrNull(), weight.trim().replace(',', '.').toDoubleOrNull())
+
+    companion object {
+        fun from(g: SetGroup) = GroupDraft(g.sets?.toString() ?: "", g.reps?.toString() ?: "", g.weight?.let { formatWeight(it) } ?: "")
+    }
+}
+
+/** A movement picked for the workout being logged. */
+data class Pick(val ex: String, val groups: List<GroupDraft> = listOf(GroupDraft()), val note: String = "")
+
+class AppViewModel(app: Application) : AndroidViewModel(app) {
+    private val store = Store(app)
+    private val saveLock = Mutex()
+
+    private val _data = MutableStateFlow<AppData?>(null)
+    val data: StateFlow<AppData?> = _data
+
+    /** One-off messages for the snackbar. */
+    val message = MutableStateFlow<String?>(null)
+
+    // The workout being put together (survives switching tabs).
+    val picked = mutableStateListOf<Pick>()
+    var logDate by mutableStateOf(LocalDate.now())
+    var logNote by mutableStateOf("")
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            _data.value = try {
+                store.load()
+            } catch (e: Exception) {
+                message.value = "Couldn't load your workouts: ${e.message}"
+                null
+            }
+        }
+    }
+
+    /** Applies a change in memory right away, then writes the file in the background. */
+    private fun change(msg: String? = null, f: (AppData) -> AppData) {
+        val cur = _data.value ?: return
+        _data.value = f(cur)
+        if (msg != null) message.value = msg
+        viewModelScope.launch(Dispatchers.IO) {
+            saveLock.withLock {
+                try {
+                    _data.value?.let { store.save(it) }
+                } catch (e: Exception) {
+                    message.value = "Couldn't save: ${e.message}"
+                }
+            }
+        }
+    }
+
+    // ---- picking movements ----
+
+    fun isPicked(id: String) = picked.any { it.ex == id }
+
+    /** Adds a movement, pre-filled with what he did last time (so he can just bump the numbers). */
+    fun togglePick(id: String) {
+        val i = picked.indexOfFirst { it.ex == id }
+        if (i >= 0) {
+            picked.removeAt(i)
+            return
+        }
+        val last = _data.value?.sessions
+            ?.firstOrNull { s -> s.items.any { it.ex == id && it.groups.any { g -> !g.isEmpty } } }
+            ?.items?.last { it.ex == id }
+        val groups = last?.groups?.filter { !it.isEmpty }?.map { GroupDraft.from(it) }
+        picked.add(Pick(id, if (groups.isNullOrEmpty()) listOf(GroupDraft()) else groups))
+    }
+
+    private fun editPick(id: String, f: (Pick) -> Pick) {
+        val i = picked.indexOfFirst { it.ex == id }
+        if (i >= 0) picked[i] = f(picked[i])
+    }
+
+    fun setGroup(id: String, index: Int, g: GroupDraft) = editPick(id) { p ->
+        p.copy(groups = p.groups.mapIndexed { i, old -> if (i == index) g else old })
+    }
+
+    fun addGroup(id: String) = editPick(id) { p -> p.copy(groups = p.groups + (p.groups.lastOrNull() ?: GroupDraft())) }
+
+    fun removeGroup(id: String, index: Int) = editPick(id) { p ->
+        val left = p.groups.filterIndexed { i, _ -> i != index }
+        p.copy(groups = left.ifEmpty { listOf(GroupDraft()) })
+    }
+
+    fun setPickNote(id: String, note: String) = editPick(id) { it.copy(note = note) }
+
+    fun canSave() = picked.isNotEmpty() || logNote.isNotBlank()
+
+    fun saveWorkout() {
+        val date = logDate.toString()
+        val items = picked.map { p -> Item(p.ex, p.groups.map { it.toGroup() }.filter { !it.isEmpty }, p.note.trim()) }
+        val note = logNote.trim()
+        if (items.isEmpty() && note.isEmpty()) return
+        change("Saved ${prettyDate(date)}") { d -> d.copy(sessions = mergeDay(d.sessions, date, items, emptyList(), note)) }
+        picked.clear()
+        logNote = ""
+        logDate = LocalDate.now()
+    }
+
+    /** Logs an area without specific movements, like "upper" in the old spreadsheet. */
+    fun logArea(areaId: String) {
+        val date = logDate.toString()
+        val label = _data.value?.areas?.firstOrNull { it.id == areaId }?.label ?: areaId
+        change("Logged $label for ${prettyDate(date)}") { d ->
+            d.copy(sessions = mergeDay(d.sessions, date, emptyList(), listOf(areaId), ""))
+        }
+    }
+
+    private fun mergeDay(list: List<Session>, date: String, items: List<Item>, areas: List<String>, note: String): List<Session> {
+        val old = list.firstOrNull { it.date == date }
+        val merged = Session(
+            date = date,
+            items = (old?.items ?: emptyList()) + items,
+            areas = ((old?.areas ?: emptyList()) + areas).distinct(),
+            raw = old?.raw ?: "",
+            tag = old?.tag ?: "",
+            note = listOf(old?.note ?: "", note).filter { it.isNotBlank() }.joinToString(" · "),
+        )
+        return (list.filter { it.date != date } + merged).sortedByDescending { it.date }
+    }
+
+    fun deleteDay(date: String) = change("Deleted ${prettyDate(date)}") { d ->
+        d.copy(sessions = d.sessions.filter { it.date != date })
+    }
+
+    /** Removes one movement from a logged day (the day goes too if nothing is left). */
+    fun deleteItem(date: String, index: Int) = change("Removed from ${prettyDate(date)}") { d ->
+        d.copy(sessions = d.sessions.mapNotNull { s ->
+            if (s.date != date) return@mapNotNull s
+            val left = s.copy(items = s.items.filterIndexed { i, _ -> i != index })
+            if (left.items.isEmpty() && left.areas.isEmpty() && left.note.isBlank() && left.raw.isBlank()) null else left
+        })
+    }
+
+    // ---- exercise list and areas ----
+
+    fun setTarget(areaId: String, days: Int) = change { d ->
+        d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(target = days.coerceIn(1, 30)) else it })
+    }
+
+    /** Adds a movement ([original] == null) or edits one. History keeps pointing at the same id. */
+    fun saveExercise(original: Exercise?, name: String, mainArea: String, also: List<String>, equip: String) {
+        val cleanName = name.trim()
+        if (cleanName.isEmpty()) return
+        val areas = listOf(mainArea) + also.filter { it != mainArea }.distinct()
+        change(if (original == null) "Added $cleanName" else "Saved $cleanName") { d ->
+            if (original == null) {
+                var id = cleanName.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifEmpty { "movement" }
+                while (d.exercises.any { it.id == id }) id += "-2"
+                d.copy(exercises = d.exercises + Exercise(id, cleanName, areas, equip.trim()))
+            } else {
+                d.copy(exercises = d.exercises.map {
+                    if (it.id == original.id) it.copy(name = cleanName, areas = areas, equip = equip.trim()) else it
+                })
+            }
+        }
+    }
+
+    /** Deletes a movement. If history uses it, it's hidden instead so old workouts still show its name. */
+    fun removeExercise(e: Exercise) {
+        picked.removeAll { it.ex == e.id }
+        change("Removed ${e.name}") { d ->
+            val used = d.sessions.any { s -> s.items.any { it.ex == e.id } }
+            d.copy(exercises = if (used) d.exercises.map { if (it.id == e.id) it.copy(hidden = true) else it }
+            else d.exercises.filter { it.id != e.id })
+        }
+    }
+
+    // ---- backup ----
+
+    fun export(uri: Uri) {
+        val d = _data.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            message.value = try {
+                store.export(uri, d)
+                "Backup saved"
+            } catch (e: Exception) {
+                "Backup failed: ${e.message}"
+            }
+        }
+    }
+
+    fun import(uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val d = store.read(uri)
+                change("Restored ${d.sessions.size} workout days") { d }
+            } catch (e: Exception) {
+                message.value = "That file isn't a Workout Log backup (${e.message})"
+            }
+        }
+    }
+}
