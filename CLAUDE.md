@@ -14,8 +14,11 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   secondary work counts as if it were half a target interval older (`Stats` in `logic/Recommend.kt`).
 - Recommendation (`Stats.focus`): up to 3 strength areas at/over target and not worked in the last day,
   topped up to 2 with ones at >= 75% of target, plus Conditioning/Mobility when due.
-- Each logged movement has set/rep/weight lines (`SetGroup`; weight in lb) plus a free note. New picks
-  are pre-filled with what he did last time.
+- Each movement has `measures` (from `Measure.ALL`: sets, reps, weight, time, band, resistance, speed,
+  incline); the Log tab shows only those fields. A logged movement has one or more lines (`SetGroup`;
+  weight in lb, time stored in seconds) plus a free note. Time is typed in minutes for cardio
+  (`Exercise.timeInMinutes`: Conditioning, or measures speed/incline/resistance), seconds otherwise; "1:30" works in both.
+  New picks are pre-filled with what he did last time.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 
@@ -29,17 +32,24 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 - `data/Models.kt`: `Area`, `Exercise`, `SetGroup`, `Item`, `Session`, `AppData` with org.json (de)serialization.
   New fields need defaults and fallbacks so older files and backups keep loading.
 - `data/Store.kt`: `workouts.json` in app storage; first launch starts from `assets/catalog.json` + `assets/history.json`.
+- `data/CatalogUpgrade.kt`: applies a newer built-in exercise list to existing data, once per catalogVersion.
 - `logic/Recommend.kt` (`Stats`), `logic/Format.kt` (dates, "4×12 @ 40 lb").
 - `ui/`: one file per tab plus `Components.kt`, `Theme.kt`.
 
 ## Starter data
 
-- `app/src/main/assets/catalog.json` (committed): body areas and the exercise list.
+- The exercise list's source is the **LIST tab of `exercise catalog.xlsx`** (his spreadsheet, on his PC,
+  git-ignored): main area, exercise, tool, also works, measures.
+- `app/src/main/assets/catalog.json` (committed): body areas and the exercise list, with `catalogVersion`
+  and `retired`. Movements he dropped that history uses are kept with `hidden: true`.
 - `app/src/main/assets/history.json` (git-ignored, on his PC only): his past workouts. The repo is
   public, so his history, spreadsheets and the web data files (`web/sessions.json`, `web/seed.py`) never
   get committed. Builds made without history.json start with an empty log (`Store.starterJson`).
-- Regenerate both with `python web/to_seed.py app/src/main/assets` (reads `web/catalog.json` and
-  `web/sessions.json`). Data decisions about his history are in `CLAUDE.local.md` (not committed).
+- Regenerate both with `python web/to_seed.py "exercise catalog.xlsx" app/src/main/assets` (needs openpyxl;
+  also reads `web/catalog.json` for existing ids and `web/sessions.json`). **Bump `CATALOG_VERSION` in
+  to_seed.py whenever the list changes**: on the next launch `CatalogUpgrade` updates phones that already
+  have the app (list wins for names/areas/measures; his targets and in-app additions stay; untouched
+  starter-history days are refreshed). A copy of the old data is saved as `workouts-before-catalog-N.json`. Data decisions about his history are in `CLAUDE.local.md` (not committed).
 - `web/workout-app.html` is the earlier web version (published as a claude.ai artifact); the phone app replaces it.
 
 ## Build and install

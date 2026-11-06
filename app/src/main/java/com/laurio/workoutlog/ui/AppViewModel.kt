@@ -11,10 +11,13 @@ import androidx.lifecycle.viewModelScope
 import com.laurio.workoutlog.data.AppData
 import com.laurio.workoutlog.data.Exercise
 import com.laurio.workoutlog.data.Item
+import com.laurio.workoutlog.data.Measure
 import com.laurio.workoutlog.data.Session
 import com.laurio.workoutlog.data.SetGroup
 import com.laurio.workoutlog.data.Store
 import com.laurio.workoutlog.logic.formatWeight
+import com.laurio.workoutlog.logic.parseTime
+import com.laurio.workoutlog.logic.timeForField
 import com.laurio.workoutlog.logic.prettyDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,12 +27,68 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
-/** One sets/reps/weight line being typed in. Kept as text so the fields edit naturally. */
-data class GroupDraft(val sets: String = "", val reps: String = "", val weight: String = "") {
-    fun toGroup() = SetGroup(sets.trim().toIntOrNull(), reps.trim().toIntOrNull(), weight.trim().replace(',', '.').toDoubleOrNull())
+/** One line being typed in (sets, reps, weight, time...). Kept as text so the fields edit naturally. */
+data class GroupDraft(
+    val sets: String = "",
+    val reps: String = "",
+    val weight: String = "",
+    val time: String = "",
+    val band: String = "",
+    val resistance: String = "",
+    val speed: String = "",
+    val incline: String = "",
+) {
+    fun get(m: String): String = when (m) {
+        Measure.SETS -> sets
+        Measure.REPS -> reps
+        Measure.WEIGHT -> weight
+        Measure.TIME -> time
+        Measure.BAND -> band
+        Measure.RESISTANCE -> resistance
+        Measure.SPEED -> speed
+        Measure.INCLINE -> incline
+        else -> ""
+    }
+
+    fun with(m: String, v: String): GroupDraft = when (m) {
+        Measure.SETS -> copy(sets = v)
+        Measure.REPS -> copy(reps = v)
+        Measure.WEIGHT -> copy(weight = v)
+        Measure.TIME -> copy(time = v)
+        Measure.BAND -> copy(band = v)
+        Measure.RESISTANCE -> copy(resistance = v)
+        Measure.SPEED -> copy(speed = v)
+        Measure.INCLINE -> copy(incline = v)
+        else -> this
+    }
+
+    /** Only the fields this movement measures are kept. */
+    fun toGroup(measures: List<String>, minutes: Boolean): SetGroup {
+        fun d(s: String) = s.trim().replace(',', '.').toDoubleOrNull()
+        fun has(m: String) = m in measures
+        return SetGroup(
+            sets = if (has(Measure.SETS)) sets.trim().toIntOrNull() else null,
+            reps = if (has(Measure.REPS)) reps.trim().toIntOrNull() else null,
+            weight = if (has(Measure.WEIGHT)) d(weight) else null,
+            time = if (has(Measure.TIME)) parseTime(time, minutes) else null,
+            band = if (has(Measure.BAND)) band.trim().ifEmpty { null } else null,
+            resistance = if (has(Measure.RESISTANCE)) d(resistance) else null,
+            speed = if (has(Measure.SPEED)) d(speed) else null,
+            incline = if (has(Measure.INCLINE)) d(incline) else null,
+        )
+    }
 
     companion object {
-        fun from(g: SetGroup) = GroupDraft(g.sets?.toString() ?: "", g.reps?.toString() ?: "", g.weight?.let { formatWeight(it) } ?: "")
+        fun from(g: SetGroup, minutes: Boolean) = GroupDraft(
+            sets = g.sets?.toString() ?: "",
+            reps = g.reps?.toString() ?: "",
+            weight = g.weight?.let { formatWeight(it) } ?: "",
+            time = g.time?.let { timeForField(it, minutes) } ?: "",
+            band = g.band ?: "",
+            resistance = g.resistance?.let { formatWeight(it) } ?: "",
+            speed = g.speed?.let { formatWeight(it) } ?: "",
+            incline = g.incline?.let { formatWeight(it) } ?: "",
+        )
     }
 }
 
@@ -92,7 +151,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val last = _data.value?.sessions
             ?.firstOrNull { s -> s.items.any { it.ex == id && it.groups.any { g -> !g.isEmpty } } }
             ?.items?.last { it.ex == id }
-        val groups = last?.groups?.filter { !it.isEmpty }?.map { GroupDraft.from(it) }
+        val minutes = _data.value?.exercises?.firstOrNull { it.id == id }?.timeInMinutes ?: false
+        val groups = last?.groups?.filter { !it.isEmpty }?.map { GroupDraft.from(it, minutes) }
         picked.add(Pick(id, if (groups.isNullOrEmpty()) listOf(GroupDraft()) else groups))
     }
 
@@ -118,7 +178,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun saveWorkout() {
         val date = logDate.toString()
-        val items = picked.map { p -> Item(p.ex, p.groups.map { it.toGroup() }.filter { !it.isEmpty }, p.note.trim()) }
+        val exById = _data.value?.exercises?.associateBy { it.id } ?: emptyMap()
+        val items = picked.map { p ->
+            val e = exById[p.ex]
+            val measures = e?.measures ?: Measure.DEFAULT
+            Item(p.ex, p.groups.map { it.toGroup(measures, e?.timeInMinutes ?: false) }.filter { !it.isEmpty }, p.note.trim())
+        }
         val note = logNote.trim()
         if (items.isEmpty() && note.isEmpty()) return
         change("Saved ${prettyDate(date)}") { d -> d.copy(sessions = mergeDay(d.sessions, date, items, emptyList(), note)) }
@@ -169,18 +234,26 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Adds a movement ([original] == null) or edits one. History keeps pointing at the same id. */
-    fun saveExercise(original: Exercise?, name: String, mainArea: String, also: List<String>, equip: String) {
+    fun saveExercise(
+        original: Exercise?,
+        name: String,
+        mainArea: String,
+        also: List<String>,
+        equip: String,
+        measures: List<String>,
+    ) {
         val cleanName = name.trim()
         if (cleanName.isEmpty()) return
         val areas = listOf(mainArea) + also.filter { it != mainArea }.distinct()
+        val ms = Measure.ALL.filter { it in measures }.ifEmpty { Measure.DEFAULT }
         change(if (original == null) "Added $cleanName" else "Saved $cleanName") { d ->
             if (original == null) {
                 var id = cleanName.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifEmpty { "movement" }
                 while (d.exercises.any { it.id == id }) id += "-2"
-                d.copy(exercises = d.exercises + Exercise(id, cleanName, areas, equip.trim()))
+                d.copy(exercises = d.exercises + Exercise(id, cleanName, areas, equip.trim(), measures = ms))
             } else {
                 d.copy(exercises = d.exercises.map {
-                    if (it.id == original.id) it.copy(name = cleanName, areas = areas, equip = equip.trim()) else it
+                    if (it.id == original.id) it.copy(name = cleanName, areas = areas, equip = equip.trim(), measures = ms) else it
                 })
             }
         }

@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.laurio.workoutlog.data.AppData
+import com.laurio.workoutlog.data.Measure
 import com.laurio.workoutlog.logic.Stats
 import com.laurio.workoutlog.logic.ago
 import com.laurio.workoutlog.logic.formatDetail
@@ -105,6 +106,8 @@ fun LogScreen(data: AppData, vm: AppViewModel, onSaved: () -> Unit) {
         items(vm.picked.toList(), key = { "pick-" + it.ex }) { p ->
             val ex = stats.exById[p.ex]
             val last = stats.lastEx[p.ex]
+            val measures = ex?.measures ?: Measure.DEFAULT
+            val minutes = ex?.timeInMinutes ?: false
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -125,10 +128,20 @@ fun LogScreen(data: AppData, vm: AppViewModel, onSaved: () -> Unit) {
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            NumberField("Sets", g.sets, Modifier.weight(1f)) { vm.setGroup(p.ex, i, g.copy(sets = it)) }
-                            NumberField("Reps", g.reps, Modifier.weight(1f)) { vm.setGroup(p.ex, i, g.copy(reps = it)) }
-                            NumberField("Weight (lb)", g.weight, Modifier.weight(1.3f), decimal = true) {
-                                vm.setGroup(p.ex, i, g.copy(weight = it))
+                            measures.forEach { m ->
+                                val w = if (m == Measure.WEIGHT || m == Measure.SPEED || m == Measure.INCLINE) 1.3f else 1f
+                                if (m == Measure.BAND) {
+                                    OutlinedTextField(
+                                        value = g.band, onValueChange = { vm.setGroup(p.ex, i, g.with(m, it)) },
+                                        label = { Text("Band", maxLines = 1) }, singleLine = true, modifier = Modifier.weight(w),
+                                    )
+                                } else {
+                                    NumberField(
+                                        Measure.label(m, minutes), g.get(m), Modifier.weight(w),
+                                        decimal = m != Measure.SETS && m != Measure.REPS,
+                                        allowColon = m == Measure.TIME,
+                                    ) { vm.setGroup(p.ex, i, g.with(m, it)) }
+                                }
                             }
                             if (p.groups.size > 1) {
                                 IconButton(onClick = { vm.removeGroup(p.ex, i) }) {
@@ -181,13 +194,27 @@ fun LogScreen(data: AppData, vm: AppViewModel, onSaved: () -> Unit) {
 }
 
 @Composable
-private fun NumberField(label: String, value: String, modifier: Modifier, decimal: Boolean = false, onChange: (String) -> Unit) {
+private fun NumberField(
+    label: String,
+    value: String,
+    modifier: Modifier,
+    decimal: Boolean = false,
+    allowColon: Boolean = false,
+    onChange: (String) -> Unit,
+) {
     OutlinedTextField(
         value = value,
-        onValueChange = { v -> onChange(v.filter { it.isDigit() || (decimal && (it == '.' || it == ',')) }) },
+        onValueChange = { v -> onChange(v.filter { it.isDigit() || (decimal && (it == '.' || it == ',')) || (allowColon && it == ':') }) },
         label = { Text(label, maxLines = 1) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
+        // Time accepts "1:30"; the plain number pad has no colon, so time gets the full keyboard's numbers.
+        keyboardOptions = KeyboardOptions(
+            keyboardType = when {
+                allowColon -> KeyboardType.Ascii
+                decimal -> KeyboardType.Decimal
+                else -> KeyboardType.Number
+            },
+        ),
         modifier = modifier,
     )
 }

@@ -1,4 +1,8 @@
 {
+ "catalogVersion": 2,
+ "retired": [
+  "incline-row"
+ ],
  "areas": [
   {
    "id": "chest",
@@ -63,7 +67,12 @@
     "chest",
     "arms"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "incline-press",
@@ -72,7 +81,12 @@
     "chest",
     "shoulders"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "flys",
@@ -80,7 +94,12 @@
    "areas": [
     "chest"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "single-arm-pushup",
@@ -89,15 +108,24 @@
     "chest",
     "core"
    ],
-   "equip": "Crosscore"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps"
+   ]
   },
   {
    "id": "cable-chest",
-   "name": "Cable chest press",
+   "name": "Cable chest press (single)",
    "areas": [
     "chest"
    ],
-   "equip": "Bosu / cable"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "bent-row",
@@ -106,15 +134,12 @@
     "back",
     "arms"
    ],
-   "equip": "Dumbbells"
-  },
-  {
-   "id": "incline-row",
-   "name": "Incline rows",
-   "areas": [
-    "back"
-   ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "reverse-fly",
@@ -123,15 +148,25 @@
     "back",
     "shoulders"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "cable-pull",
-   "name": "Cable pulls",
+   "name": "Cable pulls (single)",
    "areas": [
     "back"
    ],
-   "equip": "Crosscore"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "upper-back-pull",
@@ -139,7 +174,12 @@
    "areas": [
     "back"
    ],
-   "equip": "Bosu / cable"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "straight-arm-pulldown",
@@ -147,7 +187,12 @@
    "areas": [
     "back"
    ],
-   "equip": "Crosscore"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "dead-hang",
@@ -156,7 +201,11 @@
     "back",
     "shoulders"
    ],
-   "equip": "Bar"
+   "equip": "Pull up bar",
+   "measures": [
+    "time",
+    "band"
+   ]
   },
   {
    "id": "shrugs",
@@ -164,7 +213,12 @@
    "areas": [
     "back"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "shoulder-press",
@@ -173,7 +227,12 @@
     "shoulders",
     "arms"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "shoulder-raise",
@@ -181,7 +240,12 @@
    "areas": [
     "shoulders"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "band-shoulders",
@@ -189,15 +253,10 @@
    "areas": [
     "shoulders"
    ],
-   "equip": "Bands"
-  },
-  {
-   "id": "xc-shoulders",
-   "name": "Crosscore shoulders",
-   "areas": [
-    "shoulders"
-   ],
-   "equip": "Crosscore"
+   "equip": "Bands",
+   "measures": [
+    "sets"
+   ]
   },
   {
    "id": "kb-halo",
@@ -206,7 +265,12 @@
     "shoulders",
     "core"
    ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "curls",
@@ -214,7 +278,12 @@
    "areas": [
     "arms"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "hammer-curls",
@@ -222,7 +291,12 @@
    "areas": [
     "arms"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "xc-curl-forehead",
@@ -230,15 +304,24 @@
    "areas": [
     "arms"
    ],
-   "equip": "Crosscore"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps"
+   ]
   },
   {
    "id": "tricep-ext",
-   "name": "Tricep extensions",
+   "name": "Tricep extensions (single)",
    "areas": [
     "arms"
    ],
-   "equip": "Crosscore"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "overhead-tri",
@@ -246,7 +329,12 @@
    "areas": [
     "arms"
    ],
-   "equip": "Crosscore"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sumo-squat",
@@ -255,7 +343,12 @@
     "legs",
     "glutes"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "bosu-squat",
@@ -263,7 +356,12 @@
    "areas": [
     "legs"
    ],
-   "equip": "Bosu"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "bosu-goblet-squat",
@@ -271,16 +369,24 @@
    "areas": [
     "legs"
    ],
-   "equip": "Bosu"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
-   "id": "bosu-split-squat",
-   "name": "Bosu split squats",
+   "id": "shiko",
+   "name": "Shiko",
    "areas": [
-    "legs",
-    "glutes"
+    "legs"
    ],
-   "equip": "Bosu"
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps"
+   ]
   },
   {
    "id": "xc-split-squat",
@@ -289,7 +395,12 @@
     "legs",
     "glutes"
    ],
-   "equip": "Crosscore"
+   "equip": "Crosscore and bosu",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "xc-cross-leg-squat",
@@ -298,7 +409,12 @@
     "legs",
     "glutes"
    ],
-   "equip": "Crosscore"
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "box-step-up",
@@ -307,7 +423,12 @@
     "legs",
     "glutes"
    ],
-   "equip": "Box"
+   "equip": "Box",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "box-jump",
@@ -316,7 +437,12 @@
     "legs",
     "conditioning"
    ],
-   "equip": "Box"
+   "equip": "Box",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "rear-lunge",
@@ -325,7 +451,12 @@
     "legs",
     "glutes"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "side-lunge",
@@ -334,7 +465,12 @@
     "legs",
     "glutes"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "calf-raise",
@@ -342,7 +478,12 @@
    "areas": [
     "legs"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "leg-ext",
@@ -350,7 +491,12 @@
    "areas": [
     "legs"
    ],
-   "equip": "Ankle weights"
+   "equip": "Ankle weights",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "adduction",
@@ -358,7 +504,12 @@
    "areas": [
     "legs"
    ],
-   "equip": "Ankle weights"
+   "equip": "Ankle weights",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sl-front",
@@ -367,7 +518,12 @@
     "legs",
     "core"
    ],
-   "equip": "Crosscore"
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sl-back",
@@ -376,7 +532,12 @@
     "legs",
     "core"
    ],
-   "equip": "Crosscore"
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sl-side",
@@ -385,7 +546,12 @@
     "legs",
     "core"
    ],
-   "equip": "Crosscore"
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sl-curtsey",
@@ -394,7 +560,12 @@
     "legs",
     "glutes"
    ],
-   "equip": "Crosscore"
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sl-stand",
@@ -403,16 +574,12 @@
     "legs",
     "core"
    ],
-   "equip": "Crosscore"
-  },
-  {
-   "id": "step-over",
-   "name": "Step-overs",
-   "areas": [
-    "legs",
-    "mobility"
-   ],
-   "equip": ""
+   "equip": "Box",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "rdl",
@@ -421,7 +588,12 @@
     "glutes",
     "back"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sl-rdl",
@@ -430,7 +602,12 @@
     "glutes",
     "legs"
    ],
-   "equip": "Dumbbells"
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "hip-thrust",
@@ -438,7 +615,12 @@
    "areas": [
     "glutes"
    ],
-   "equip": ""
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "sl-glute-bridge",
@@ -446,7 +628,12 @@
    "areas": [
     "glutes"
    ],
-   "equip": ""
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "ball-ham-curl",
@@ -455,7 +642,11 @@
     "glutes",
     "core"
    ],
-   "equip": "Yoga ball"
+   "equip": "Yoga ball",
+   "measures": [
+    "sets",
+    "reps"
+   ]
   },
   {
    "id": "glute-kickback",
@@ -463,7 +654,12 @@
    "areas": [
     "glutes"
    ],
-   "equip": "Ankle weights"
+   "equip": "Ankle weights",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "glute-lunge-hold",
@@ -472,7 +668,11 @@
     "glutes",
     "mobility"
    ],
-   "equip": ""
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
   },
   {
    "id": "ab-wheel",
@@ -480,7 +680,11 @@
    "areas": [
     "core"
    ],
-   "equip": "Ab wheel"
+   "equip": "Ab wheel",
+   "measures": [
+    "sets",
+    "reps"
+   ]
   },
   {
    "id": "bosu-crunch",
@@ -488,7 +692,11 @@
    "areas": [
     "core"
    ],
-   "equip": "Bosu"
+   "equip": "Bosu ball",
+   "measures": [
+    "sets",
+    "reps"
+   ]
   },
   {
    "id": "hanging-core",
@@ -497,7 +705,11 @@
     "core",
     "back"
    ],
-   "equip": "Bar"
+   "equip": "Pullup bar",
+   "measures": [
+    "sets",
+    "time"
+   ]
   },
   {
    "id": "l-sit",
@@ -505,15 +717,11 @@
    "areas": [
     "core"
    ],
-   "equip": ""
-  },
-  {
-   "id": "xc-core",
-   "name": "Crosscore core",
-   "areas": [
-    "core"
-   ],
-   "equip": "Crosscore"
+   "equip": "Dip bars",
+   "measures": [
+    "sets",
+    "time"
+   ]
   },
   {
    "id": "kb-oblique",
@@ -521,7 +729,12 @@
    "areas": [
     "core"
    ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "suitcase-carry",
@@ -530,7 +743,11 @@
     "core",
     "back"
    ],
-   "equip": "Kettlebell"
+   "equip": "Dumbell",
+   "measures": [
+    "sets",
+    "weight"
+   ]
   },
   {
    "id": "superman",
@@ -539,16 +756,39 @@
     "core",
     "back"
    ],
-   "equip": ""
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "kb-getup",
+   "name": "KB Get Up",
+   "areas": [
+    "core",
+    "shoulders"
+   ],
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "kb-swing",
-   "name": "KB swing (two-hand)",
+   "name": "KB two-hand swing",
    "areas": [
     "conditioning",
     "glutes"
    ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "kb-1h-swing",
@@ -557,7 +797,12 @@
     "conditioning",
     "glutes"
    ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "kb-oh-swing",
@@ -566,7 +811,12 @@
     "conditioning",
     "shoulders"
    ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "kb-clean-press",
@@ -576,7 +826,12 @@
     "shoulders",
     "legs"
    ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "kb-snatch",
@@ -586,16 +841,12 @@
     "shoulders",
     "glutes"
    ],
-   "equip": "Kettlebell"
-  },
-  {
-   "id": "kb-getup",
-   "name": "KB stand-up (get-up)",
-   "areas": [
-    "core",
-    "shoulders"
-   ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "kb-pistol-draw",
@@ -604,7 +855,12 @@
     "conditioning",
     "shoulders"
    ],
-   "equip": "Kettlebell"
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "slam-ball",
@@ -613,7 +869,12 @@
     "conditioning",
     "core"
    ],
-   "equip": "Slam ball"
+   "equip": "Slamball",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "rowing",
@@ -622,16 +883,24 @@
     "conditioning",
     "back"
    ],
-   "equip": "Rower"
+   "equip": "Rowing machine",
+   "measures": [
+    "sets",
+    "time",
+    "resistance"
+   ]
   },
   {
    "id": "heavy-bag",
-   "name": "Heavy bag",
+   "name": "Heavy bag workout",
    "areas": [
     "conditioning",
     "shoulders"
    ],
-   "equip": "Heavy bag"
+   "equip": "",
+   "measures": [
+    "time"
+   ]
   },
   {
    "id": "paddle",
@@ -639,7 +908,10 @@
    "areas": [
     "conditioning"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "time"
+   ]
   },
   {
    "id": "walk",
@@ -647,7 +919,12 @@
    "areas": [
     "conditioning"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "speed",
+    "incline",
+    "time"
+   ]
   },
   {
    "id": "asian-squat",
@@ -655,7 +932,11 @@
    "areas": [
     "mobility"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ]
   },
   {
    "id": "90-90",
@@ -663,7 +944,11 @@
    "areas": [
     "mobility"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ]
   },
   {
    "id": "cossack",
@@ -672,7 +957,11 @@
     "mobility",
     "legs"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ]
   },
   {
    "id": "leg-under",
@@ -680,7 +969,11 @@
    "areas": [
     "mobility"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps"
+   ]
   },
   {
    "id": "horse-stance",
@@ -689,7 +982,11 @@
     "mobility",
     "legs"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ]
   },
   {
    "id": "down-dog",
@@ -697,15 +994,12 @@
    "areas": [
     "mobility"
    ],
-   "equip": ""
-  },
-  {
-   "id": "hold-lunge",
-   "name": "Hold lunge",
-   "areas": [
-    "mobility"
-   ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "hip-openers",
@@ -713,7 +1007,12 @@
    "areas": [
     "mobility"
    ],
-   "equip": "Ankle weights"
+   "equip": "Ankle weights",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
   },
   {
    "id": "hip-flexor",
@@ -721,7 +1020,104 @@
    "areas": [
     "mobility"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "glute-stretch",
+   "name": "Glute stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "active-reach",
+   "name": "Active reach",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "xc-shoulders",
+   "name": "Crosscore shoulders",
+   "areas": [
+    "shoulders"
+   ],
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ],
+   "hidden": true
+  },
+  {
+   "id": "bosu-split-squat",
+   "name": "Bosu split squats",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Bosu",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ],
+   "hidden": true
+  },
+  {
+   "id": "step-over",
+   "name": "Step-overs",
+   "areas": [
+    "legs",
+    "mobility"
+   ],
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "hidden": true
+  },
+  {
+   "id": "xc-core",
+   "name": "Crosscore core",
+   "areas": [
+    "core"
+   ],
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "hidden": true
+  },
+  {
+   "id": "hold-lunge",
+   "name": "Hold lunge",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ],
+   "hidden": true
   },
   {
    "id": "shoulder-mobility",
@@ -730,23 +1126,12 @@
     "mobility",
     "shoulders"
    ],
-   "equip": ""
-  },
-  {
-   "id": "glute-stretch",
-   "name": "Glute stretch",
-   "areas": [
-    "mobility"
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps"
    ],
-   "equip": ""
-  },
-  {
-   "id": "active-reach",
-   "name": "Active reach",
-   "areas": [
-    "mobility"
-   ],
-   "equip": ""
+   "hidden": true
   },
   {
    "id": "side-split",
@@ -754,7 +1139,12 @@
    "areas": [
     "mobility"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ],
+   "hidden": true
   },
   {
    "id": "stretch",
@@ -762,7 +1152,11 @@
    "areas": [
     "mobility"
    ],
-   "equip": ""
+   "equip": "",
+   "measures": [
+    "time"
+   ],
+   "hidden": true
   }
  ]
 }

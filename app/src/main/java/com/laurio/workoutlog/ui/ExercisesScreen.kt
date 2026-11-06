@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.laurio.workoutlog.data.AppData
 import com.laurio.workoutlog.data.Area
 import com.laurio.workoutlog.data.Exercise
+import com.laurio.workoutlog.data.Measure
 import com.laurio.workoutlog.logic.Stats
 import com.laurio.workoutlog.logic.ago
 import java.time.LocalDate
@@ -118,8 +119,8 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
             original = editing,
             timesLogged = editing?.let { stats.countEx[it.id] } ?: 0,
             onDismiss = { adding = false; editing = null },
-            onSave = { name, main, also, equip ->
-                vm.saveExercise(editing, name, main, also, equip)
+            onSave = { name, main, also, equip, measures ->
+                vm.saveExercise(editing, name, main, also, equip, measures)
                 adding = false; editing = null
             },
             onDelete = { e -> vm.removeExercise(e); editing = null },
@@ -168,6 +169,7 @@ private fun AreaCard(
                         Text(e.name, style = MaterialTheme.typography.bodyLarge)
                         val sub = listOfNotNull(
                             e.equip.takeIf { it.isNotBlank() },
+                            e.measures.joinToString(" / ") { Measure.name(it).lowercase() },
                             e.areas.drop(1).takeIf { it.isNotEmpty() }?.let { also -> "also " + also.joinToString { areaNames[it] ?: it } },
                         ).joinToString(" · ")
                         if (sub.isNotEmpty()) Text(sub, style = MaterialTheme.typography.bodySmall, color = Muted)
@@ -190,13 +192,14 @@ private fun ExerciseDialog(
     original: Exercise?,
     timesLogged: Int,
     onDismiss: () -> Unit,
-    onSave: (name: String, main: String, also: List<String>, equip: String) -> Unit,
+    onSave: (name: String, main: String, also: List<String>, equip: String, measures: List<String>) -> Unit,
     onDelete: (Exercise) -> Unit,
 ) {
     var name by remember { mutableStateOf(original?.name ?: "") }
     var main by remember { mutableStateOf(original?.mainArea ?: areas.first().id) }
     val also = remember { mutableStateListOf<String>().apply { original?.areas?.drop(1)?.let { addAll(it) } } }
     var equip by remember { mutableStateOf(original?.equip ?: "") }
+    val measures = remember { mutableStateListOf<String>().apply { addAll(original?.measures ?: Measure.DEFAULT) } }
     var confirmDelete by remember { mutableStateOf(false) }
 
     AlertDialog(
@@ -222,6 +225,14 @@ private fun ExerciseDialog(
                     value = equip, onValueChange = { equip = it }, label = { Text("Equipment (optional)") },
                     singleLine = true, modifier = Modifier.fillMaxWidth(),
                 )
+                Text("What you log for it", style = MaterialTheme.typography.labelLarge, color = Muted)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Measure.ALL.forEach { m ->
+                        Chip(Measure.name(m), selected = m in measures) {
+                            if (m in measures) { if (measures.size > 1) measures.remove(m) } else measures.add(m)
+                        }
+                    }
+                }
                 if (original != null) {
                     if (!confirmDelete) {
                         TextButton(onClick = { confirmDelete = true }) {
@@ -242,7 +253,10 @@ private fun ExerciseDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(name, main, also.toList(), equip) }, enabled = name.isNotBlank()) { Text("Save") }
+            TextButton(
+                onClick = { onSave(name, main, also.toList(), equip, Measure.ALL.filter { it in measures }) },
+                enabled = name.isNotBlank(),
+            ) { Text("Save") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )

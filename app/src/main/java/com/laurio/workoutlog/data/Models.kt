@@ -32,11 +32,18 @@ data class Exercise(
     val areas: List<String>,
     val equip: String = "",
     val hidden: Boolean = false,
+    /** What gets logged for it, from [Measure.ALL], in that order. */
+    val measures: List<String> = Measure.DEFAULT,
 ) {
     val mainArea: String get() = areas.firstOrNull() ?: ""
 
+    /** Cardio-type time is entered in minutes; holds and hangs in seconds. */
+    val timeInMinutes: Boolean
+        get() = mainArea == "conditioning" || measures.any { it == Measure.SPEED || it == Measure.INCLINE || it == Measure.RESISTANCE }
+
     fun toJson(): JSONObject = JSONObject().put("id", id).put("name", name)
-        .put("areas", JSONArray(areas)).put("equip", equip).apply { if (hidden) put("hidden", true) }
+        .put("areas", JSONArray(areas)).put("equip", equip).put("measures", JSONArray(measures))
+        .apply { if (hidden) put("hidden", true) }
 
     companion object {
         fun fromJson(o: JSONObject) = Exercise(
@@ -45,18 +52,74 @@ data class Exercise(
             areas = o.optJSONArray("areas").strings(),
             equip = o.optString("equip", ""),
             hidden = o.optBoolean("hidden", false),
+            measures = o.optJSONArray("measures").strings().filter { it in Measure.ALL }.ifEmpty { Measure.DEFAULT },
         )
     }
 }
 
-/** One line of a movement: e.g. 4 sets of 12 reps at 40 lb. Any part can be missing. */
-data class SetGroup(val sets: Int? = null, val reps: Int? = null, val weight: Double? = null) {
-    val isEmpty: Boolean get() = sets == null && reps == null && weight == null
+/** The things a movement can measure. Order here is the order the fields appear in. */
+object Measure {
+    const val SETS = "sets"
+    const val REPS = "reps"
+    const val WEIGHT = "weight"
+    const val TIME = "time"
+    const val BAND = "band"
+    const val RESISTANCE = "resistance"
+    const val SPEED = "speed"
+    const val INCLINE = "incline"
+    val ALL = listOf(SETS, REPS, WEIGHT, TIME, BAND, RESISTANCE, SPEED, INCLINE)
+    val DEFAULT = listOf(SETS, REPS, WEIGHT)
+
+    fun label(m: String, timeInMinutes: Boolean = false): String = when (m) {
+        SETS -> "Sets"
+        REPS -> "Reps"
+        WEIGHT -> "Weight (lb)"
+        TIME -> if (timeInMinutes) "Min" else "Sec"
+        BAND -> "Band"
+        RESISTANCE -> "Level"
+        SPEED -> "Speed (mph)"
+        INCLINE -> "Incline (%)"
+        else -> m
+    }
+
+    /** Short name for the Exercises list and dialog. */
+    fun name(m: String): String = when (m) {
+        WEIGHT -> "Weight"
+        TIME -> "Time"
+        RESISTANCE -> "Resistance"
+        SPEED -> "Speed"
+        INCLINE -> "Incline"
+        else -> label(m)
+    }
+}
+
+/**
+ * One line of a movement, e.g. 4 sets of 12 reps at 40 lb. Any part can be missing.
+ * [time] is in seconds; [band] is free text (color or strength); [resistance] is the machine level.
+ */
+data class SetGroup(
+    val sets: Int? = null,
+    val reps: Int? = null,
+    val weight: Double? = null,
+    val time: Int? = null,
+    val band: String? = null,
+    val resistance: Double? = null,
+    val speed: Double? = null,
+    val incline: Double? = null,
+) {
+    val isEmpty: Boolean
+        get() = sets == null && reps == null && weight == null && time == null &&
+            band.isNullOrBlank() && resistance == null && speed == null && incline == null
 
     fun toJson(): JSONObject = JSONObject().apply {
         sets?.let { put("sets", it) }
         reps?.let { put("reps", it) }
         weight?.let { put("weight", it) }
+        time?.let { put("time", it) }
+        band?.takeIf { it.isNotBlank() }?.let { put("band", it) }
+        resistance?.let { put("resistance", it) }
+        speed?.let { put("speed", it) }
+        incline?.let { put("incline", it) }
     }
 
     companion object {
@@ -64,6 +127,11 @@ data class SetGroup(val sets: Int? = null, val reps: Int? = null, val weight: Do
             sets = if (o.has("sets")) o.optInt("sets") else null,
             reps = if (o.has("reps")) o.optInt("reps") else null,
             weight = if (o.has("weight")) o.optDouble("weight") else null,
+            time = if (o.has("time")) o.optInt("time") else null,
+            band = if (o.has("band")) o.optString("band", "") else null,
+            resistance = if (o.has("resistance")) o.optDouble("resistance") else null,
+            speed = if (o.has("speed")) o.optDouble("speed") else null,
+            incline = if (o.has("incline")) o.optDouble("incline") else null,
         )
     }
 }
@@ -116,9 +184,18 @@ data class Session(
     }
 }
 
-data class AppData(val areas: List<Area>, val exercises: List<Exercise>, val sessions: List<Session>) {
+/**
+ * [catalogVersion] = which built-in exercise list this data has been updated to (see Store.upgrade).
+ */
+data class AppData(
+    val areas: List<Area>,
+    val exercises: List<Exercise>,
+    val sessions: List<Session>,
+    val catalogVersion: Int = 1,
+) {
     fun toJson(): JSONObject = JSONObject()
         .put("version", 1)
+        .put("catalogVersion", catalogVersion)
         .put("areas", JSONArray().apply { areas.forEach { put(it.toJson()) } })
         .put("exercises", JSONArray().apply { exercises.forEach { put(it.toJson()) } })
         .put("sessions", JSONArray().apply { sessions.sortedBy { it.date }.forEach { put(it.toJson()) } })
@@ -135,6 +212,7 @@ data class AppData(val areas: List<Area>, val exercises: List<Exercise>, val ses
                 areas = areas,
                 exercises = list("exercises") { Exercise.fromJson(it) },
                 sessions = list("sessions") { Session.fromJson(it) }.sortedByDescending { it.date },
+                catalogVersion = o.optInt("catalogVersion", 1),
             )
         }
     }

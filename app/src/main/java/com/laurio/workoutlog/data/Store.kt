@@ -7,7 +7,8 @@ import java.io.File
 
 /**
  * Keeps all data in workouts.json in the app's private storage. On first launch (no file yet)
- * it starts from the starter files in assets (see [starterJson]).
+ * it starts from the starter files in assets (see [starterJson]). When a newer built-in exercise
+ * list ships (catalog.json "catalogVersion"), existing data is updated once ([CatalogUpgrade]).
  */
 class Store(private val context: Context) {
     private val file = File(context.filesDir, "workouts.json")
@@ -16,7 +17,13 @@ class Store(private val context: Context) {
     fun load(): AppData {
         if (file.exists()) {
             try {
-                return AppData.fromJson(JSONObject(file.readText()))
+                val data = AppData.fromJson(JSONObject(file.readText()))
+                val upgraded = upgrade(data)
+                if (upgraded !== data) {
+                    runCatching { file.copyTo(File(file.parentFile, "workouts-before-catalog-${upgraded.catalogVersion}.json"), overwrite = true) }
+                    save(upgraded)
+                }
+                return upgraded
             } catch (e: Exception) {
                 // Keep the unreadable file instead of silently losing it.
                 runCatching { file.copyTo(File(file.parentFile, "workouts-unreadable-${System.currentTimeMillis()}.json")) }
@@ -25,6 +32,14 @@ class Store(private val context: Context) {
         val seed = AppData.fromJson(starterJson())
         save(seed)
         return seed
+    }
+
+    private fun upgrade(data: AppData): AppData {
+        val catalog = JSONObject(asset("catalog.json") ?: return data)
+        val version = catalog.optInt("catalogVersion", 1)
+        if (version <= data.catalogVersion) return data
+        val retired = catalog.optJSONArray("retired")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet()
+        return CatalogUpgrade.apply(data, AppData.fromJson(catalog), retired, version, AppData.fromJson(starterJson()).sessions)
     }
 
     /**
