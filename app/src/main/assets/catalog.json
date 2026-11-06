@@ -321,11 +321,11 @@
    "areas": [
     "arms"
    ],
-   "equip": "Dumbbells",
+   "equip": "Bands, anchored low",
    "measures": [
     "sets",
     "reps",
-    "weight"
+    "band"
    ]
   },
   {
