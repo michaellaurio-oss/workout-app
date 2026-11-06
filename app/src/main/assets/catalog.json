@@ -1,5 +1,5 @@
 {
- "catalogVersion": 3,
+ "catalogVersion": 4,
  "retired": [
   "incline-row"
  ],
@@ -124,6 +124,20 @@
     "chest"
    ],
    "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "dips",
+   "name": "Dips",
+   "areas": [
+    "chest",
+    "arms"
+   ],
+   "equip": "Dip bars",
    "measures": [
     "sets",
     "reps",

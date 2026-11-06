@@ -7,7 +7,7 @@ Bump CATALOG_VERSION whenever the exercise list changes, so phones that already 
 """
 import json, os, re, sys
 
-CATALOG_VERSION = 3
+CATALOG_VERSION = 4
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 AREAS = [  # id, label, target days, kind  (targets: Area Targets tab)
@@ -16,6 +16,8 @@ AREAS = [  # id, label, target days, kind  (targets: Area Targets tab)
     ("core", "Core", 3, "strength"), ("conditioning", "Conditioning", 3, "conditioning"), ("mobility", "Mobility", 2, "mobility"),
 ]
 AREA_ID = {label.lower(): i for i, label, _, _ in AREAS}
+# Other words he uses in "Also works" for an area.
+AREA_ID.update({"triceps": "arms", "biceps": "arms", "glutes": "glutes", "hamstrings": "glutes"})
 MEASURES = ["sets", "reps", "weight", "time", "band", "resistance", "speed", "incline"]
 
 # Names in the LIST tab that differ from the ids already used in his history.
