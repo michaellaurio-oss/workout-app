@@ -81,6 +81,13 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
         return picked + extras
     }
 
+    /**
+     * When nothing is due, every area is offered, longest since worked first, so the area he
+     * did most recently ends up at the bottom.
+     */
+    fun allByRest(): List<AreaStatus> =
+        areas.sortedWith(compareByDescending<AreaStatus> { it.days ?: Int.MAX_VALUE }.thenByDescending { it.ratio })
+
     /** Movements whose main area is [areaId]: never-logged first, then the longest ago. */
     fun movements(areaId: String): List<Movement> = data.exercises
         .filter { !it.hidden && it.mainArea == areaId }

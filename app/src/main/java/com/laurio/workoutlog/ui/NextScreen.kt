@@ -40,6 +40,8 @@ import java.time.LocalDate
 fun NextScreen(data: AppData, vm: AppViewModel) {
     val stats = remember(data) { Stats(data) }
     val focus = remember(stats) { stats.focus() }
+    val allFresh = focus.isEmpty()
+    val cards = remember(stats) { if (allFresh) stats.allByRest() else focus }
     val expanded = remember { mutableStateListOf<String>() }
 
     LazyColumn(
@@ -50,22 +52,25 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
             ScreenTitle("Next workout", prettyDate(LocalDate.now().toString()))
             Spacer(Modifier.height(8.dp))
             Text(
-                if (focus.isEmpty()) "Everything is fresh. Pick anything, or rest."
+                if (allFresh) "Everything is fresh. Pick anything, or rest."
                 else "Work on: " + focus.joinToString { it.area.label },
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                "Movements are listed oldest first, so the ones you haven't done in a while are on top. Tick what you do, then tap Log.",
+                (if (allFresh) "All areas are below, longest since you worked them first; the one you did most recently is last. " else "") +
+                    "Movements are listed oldest first, so the ones you haven't done in a while are on top. Tick what you do, then tap Log.",
                 style = MaterialTheme.typography.bodySmall, color = Muted,
             )
         } }
-        items(focus, key = { it.area.id }) { st ->
+        items(cards, key = { it.area.id }) { st ->
             FocusCard(st, stats, vm, open = st.area.id in expanded) {
                 if (st.area.id in expanded) expanded.remove(st.area.id) else expanded.add(st.area.id)
             }
         }
-        item { SectionLabel("All areas · the tick is your target") }
-        items(stats.areas.sortedByDescending { it.ratio }, key = { "all-" + it.area.id }) { AreaRow(it) }
+        if (!allFresh) {
+            item { SectionLabel("All areas · the tick is your target") }
+            items(stats.areas.sortedByDescending { it.ratio }, key = { "all-" + it.area.id }) { AreaRow(it) }
+        }
     }
 }
 

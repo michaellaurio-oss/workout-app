@@ -14,6 +14,8 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   secondary work counts as if it were half a target interval older (`Stats` in `logic/Recommend.kt`).
 - Recommendation (`Stats.focus`): up to 3 strength areas at/over target and not worked in the last day,
   topped up to 2 with ones at >= 75% of target, plus Conditioning/Mobility when due.
+  When nothing is due, the Next tab shows every area instead (`Stats.allByRest`), longest since worked
+  first, so the one he did most recently is at the bottom.
 - Each movement has `measures` (from `Measure.ALL`: sets, reps, weight, time, band, resistance, speed,
   incline); the Log tab shows only those fields. A logged movement has one or more lines (`SetGroup`;
   weight in lb, time stored in seconds) plus a free note. Time is typed in minutes for cardio
