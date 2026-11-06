@@ -807,6 +807,18 @@
    ]
   },
   {
+   "id": "hollow-body-hold",
+   "name": "Hollow body hold",
+   "areas": [
+    "core"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
    "id": "kb-swing",
    "name": "KB two-hand swing",
    "areas": [
