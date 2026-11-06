@@ -8,6 +8,8 @@ package com.laurio.workoutlog.data
  *   measures, hidden). New ones are added. Ones he added in the app are kept. The list carries
  *   dropped movements that history uses as hidden, so fresh installs still show their names.
  * - Ids listed in "retired" (dropped and never used) are hidden if a workout uses them, otherwise removed.
+ * - "merged" maps an old id to the movement it was folded into: logged workouts move over and the
+ *   old movement goes away.
  * - Areas keep his targets; labels and new areas come from the list.
  * - Days from the starter history that he hasn't changed (same original text and number of
  *   movements) are replaced by the starter version, which picks up better-parsed numbers.
@@ -19,13 +21,18 @@ object CatalogUpgrade {
         retired: Set<String>,
         version: Int,
         history: List<Session>,
+        merged: Map<String, String> = emptyMap(),
     ): AppData {
         if (version <= data.catalogVersion) return data
+        val remapped = data.sessions.map { s ->
+            if (s.items.none { it.ex in merged }) s
+            else s.copy(items = s.items.map { i -> merged[i.ex]?.let { i.copy(ex = it) } ?: i })
+        }
 
         val listed = catalog.exercises
         val listedIds = listed.map { it.id }.toSet()
-        val used = data.sessions.flatMap { s -> s.items.map { it.ex } }.toSet()
-        val extras = data.exercises.filter { it.id !in listedIds }.mapNotNull { e ->
+        val used = remapped.flatMap { s -> s.items.map { it.ex } }.toSet()
+        val extras = data.exercises.filter { it.id !in listedIds && it.id !in merged }.mapNotNull { e ->
             when {
                 e.id !in retired -> e // he added it in the app
                 e.id in used -> e.copy(hidden = true)
@@ -39,7 +46,7 @@ object CatalogUpgrade {
             data.areas.filter { a -> catalog.areas.none { it.id == a.id } }
 
         val seedByDate = history.associateBy { it.date }
-        val sessions = data.sessions.map { s ->
+        val sessions = remapped.map { s ->
             val seed = seedByDate[s.date]
             if (seed != null && s.raw.isNotBlank() && s.raw == seed.raw && s.items.size == seed.items.size) {
                 seed.copy(note = s.note)

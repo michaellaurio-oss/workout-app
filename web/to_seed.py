@@ -7,7 +7,7 @@ Bump CATALOG_VERSION whenever the exercise list changes, so phones that already 
 """
 import json, os, re, sys
 
-CATALOG_VERSION = 2
+CATALOG_VERSION = 3
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 AREAS = [  # id, label, target days, kind  (targets: Area Targets tab)
@@ -24,7 +24,6 @@ ALIAS = {"cable chest press (single)": "cable-chest", "cable pulls (single)": "c
          "heavy bag workout": "heavy-bag", "crosscore split squats": "xc-split-squat"}
 # Dropped from the LIST tab but used in history: kept hidden so old workouts keep their names.
 HIDDEN = [("xc-shoulders", "Crosscore shoulders", ["shoulders"], "Crosscore", ["sets", "reps", "weight"]),
-          ("bosu-split-squat", "Bosu split squats", ["legs", "glutes"], "Bosu", ["sets", "reps", "weight"]),
           ("step-over", "Step-overs", ["legs", "mobility"], "", ["sets", "reps"]),
           ("xc-core", "Crosscore core", ["core"], "Crosscore", ["sets", "reps"]),
           ("hold-lunge", "Hold lunge", ["mobility"], "", ["sets", "time"]),
@@ -32,6 +31,8 @@ HIDDEN = [("xc-shoulders", "Crosscore shoulders", ["shoulders"], "Crosscore", ["
           ("side-split", "Side split", ["mobility"], "", ["sets", "time"]),
           ("stretch", "General stretch", ["mobility"], "", ["time"])]
 RETIRED = ["incline-row"]  # dropped and never logged
+# Old id -> the movement it was folded into (history moves over). Confirmed by Michael.
+MERGED = {"bosu-split-squat": "xc-split-squat"}
 
 
 def slug(s):
@@ -94,7 +95,7 @@ def main(xlsx, out):
     old_ids = {e["name"].lower(): e["id"] for e in old["exercises"]}
     exercises = catalog_from_xlsx(xlsx, old_ids)
     measures = {e["id"]: e["measures"] for e in exercises}
-    catalog = {"catalogVersion": CATALOG_VERSION, "retired": RETIRED,
+    catalog = {"catalogVersion": CATALOG_VERSION, "retired": RETIRED, "merged": MERGED,
                "areas": [dict(id=i, label=l, target=t, kind=k) for i, l, t, k in AREAS], "exercises": exercises}
     json.dump(catalog, open(os.path.join(out, "catalog.json"), "w"), indent=1)
     json.dump(catalog, open(os.path.join(HERE, "catalog.json"), "w"), indent=1)
@@ -104,6 +105,7 @@ def main(xlsx, out):
         ses = json.load(open(sessions_path))
         for s in ses:
             for it in s["items"]:
+                it["ex"] = MERGED.get(it["ex"], it["ex"])
                 assert it["ex"] in measures, it["ex"]
                 d = it.pop("detail", "")
                 it["groups"], it["note"] = parse(d, measures[it["ex"]])

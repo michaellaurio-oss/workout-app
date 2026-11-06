@@ -41,7 +41,8 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 - The exercise list's source is the **LIST tab of `exercise catalog.xlsx`** (his spreadsheet, on his PC,
   git-ignored): main area, exercise, tool, also works, measures.
 - `app/src/main/assets/catalog.json` (committed): body areas and the exercise list, with `catalogVersion`
-  and `retired`. Movements he dropped that history uses are kept with `hidden: true`.
+  `retired` and `merged` (old id -> the movement it was folded into; history moves over on upgrade).
+  Movements he dropped that history uses are kept with `hidden: true`.
 - `app/src/main/assets/history.json` (git-ignored, on his PC only): his past workouts. The repo is
   public, so his history, spreadsheets and the web data files (`web/sessions.json`, `web/seed.py`) never
   get committed. Builds made without history.json start with an empty log (`Store.starterJson`).

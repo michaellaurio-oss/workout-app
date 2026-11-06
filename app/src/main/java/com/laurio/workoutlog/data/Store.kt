@@ -39,7 +39,8 @@ class Store(private val context: Context) {
         val version = catalog.optInt("catalogVersion", 1)
         if (version <= data.catalogVersion) return data
         val retired = catalog.optJSONArray("retired")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet()
-        return CatalogUpgrade.apply(data, AppData.fromJson(catalog), retired, version, AppData.fromJson(starterJson()).sessions)
+        val merged = catalog.optJSONObject("merged")?.let { o -> o.keys().asSequence().associateWith { o.getString(it) } } ?: emptyMap()
+        return CatalogUpgrade.apply(data, AppData.fromJson(catalog), retired, version, AppData.fromJson(starterJson()).sessions, merged)
     }
 
     /**

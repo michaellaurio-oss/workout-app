@@ -1,8 +1,11 @@
 {
- "catalogVersion": 2,
+ "catalogVersion": 3,
  "retired": [
   "incline-row"
  ],
+ "merged": {
+  "bosu-split-squat": "xc-split-squat"
+ },
  "areas": [
   {
    "id": "chest",
@@ -1057,21 +1060,6 @@
     "shoulders"
    ],
    "equip": "Crosscore",
-   "measures": [
-    "sets",
-    "reps",
-    "weight"
-   ],
-   "hidden": true
-  },
-  {
-   "id": "bosu-split-squat",
-   "name": "Bosu split squats",
-   "areas": [
-    "legs",
-    "glutes"
-   ],
-   "equip": "Bosu",
    "measures": [
     "sets",
     "reps",
