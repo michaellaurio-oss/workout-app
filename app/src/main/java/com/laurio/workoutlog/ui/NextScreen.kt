@@ -42,6 +42,7 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
     val focus = remember(stats) { stats.focus() }
     val allFresh = focus.isEmpty()
     val cards = remember(stats) { if (allFresh) stats.allByRest() else focus }
+    val routine = remember(stats) { stats.everySession() }
     val expanded = remember { mutableStateListOf<String>() }
 
     LazyColumn(
@@ -62,6 +63,9 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
                 style = MaterialTheme.typography.bodySmall, color = Muted,
             )
         } }
+        if (routine.isNotEmpty()) {
+            item(key = "every-session") { RoutineCard(routine, stats, vm) }
+        }
         items(cards, key = { it.area.id }) { st ->
             FocusCard(st, stats, vm, open = st.area.id in expanded) {
                 if (st.area.id in expanded) expanded.remove(st.area.id) else expanded.add(st.area.id)
@@ -97,6 +101,25 @@ private fun FocusCard(st: AreaStatus, stats: Stats, vm: AppViewModel, open: Bool
             }
             if (list.size > 4) {
                 TextButton(onClick = onToggleOpen) { Text(if (open) "Show fewer" else "Show all ${list.size}") }
+            }
+        }
+    }
+}
+
+/** His every-session routine, always at the top whatever is due. */
+@Composable
+private fun RoutineCard(list: List<Movement>, stats: Stats, vm: AppViewModel) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+        Column(Modifier.padding(16.dp)) {
+            Text("EVERY SESSION", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(
+                "Your routine. Mark movements \"Do every session\" on the Exercises tab to add them here.",
+                style = MaterialTheme.typography.bodySmall, color = Muted,
+            )
+            Spacer(Modifier.height(6.dp))
+            list.forEach { m ->
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                MovementRow(m, stats, checked = vm.isPicked(m.exercise.id)) { vm.togglePick(m.exercise.id) }
             }
         }
     }

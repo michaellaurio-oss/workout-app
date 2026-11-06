@@ -119,8 +119,8 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
             original = editing,
             timesLogged = editing?.let { stats.countEx[it.id] } ?: 0,
             onDismiss = { adding = false; editing = null },
-            onSave = { name, main, also, equip, measures ->
-                vm.saveExercise(editing, name, main, also, equip, measures)
+            onSave = { name, main, also, equip, measures, every ->
+                vm.saveExercise(editing, name, main, also, equip, measures, every)
                 adding = false; editing = null
             },
             onDelete = { e -> vm.removeExercise(e); editing = null },
@@ -170,6 +170,7 @@ private fun AreaCard(
                         val sub = listOfNotNull(
                             e.equip.takeIf { it.isNotBlank() },
                             e.measures.joinToString(" / ") { Measure.name(it).lowercase() },
+                            if (e.everySession) "every session" else null,
                             e.areas.drop(1).takeIf { it.isNotEmpty() }?.let { also -> "also " + also.joinToString { areaNames[it] ?: it } },
                         ).joinToString(" · ")
                         if (sub.isNotEmpty()) Text(sub, style = MaterialTheme.typography.bodySmall, color = Muted)
@@ -192,7 +193,7 @@ private fun ExerciseDialog(
     original: Exercise?,
     timesLogged: Int,
     onDismiss: () -> Unit,
-    onSave: (name: String, main: String, also: List<String>, equip: String, measures: List<String>) -> Unit,
+    onSave: (name: String, main: String, also: List<String>, equip: String, measures: List<String>, everySession: Boolean) -> Unit,
     onDelete: (Exercise) -> Unit,
 ) {
     var name by remember { mutableStateOf(original?.name ?: "") }
@@ -201,6 +202,7 @@ private fun ExerciseDialog(
     var equip by remember { mutableStateOf(original?.equip ?: "") }
     val measures = remember { mutableStateListOf<String>().apply { addAll(original?.measures ?: Measure.DEFAULT) } }
     var confirmDelete by remember { mutableStateOf(false) }
+    var every by remember { mutableStateOf(original?.everySession ?: false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -233,6 +235,8 @@ private fun ExerciseDialog(
                         }
                     }
                 }
+                Text("Routine", style = MaterialTheme.typography.labelLarge, color = Muted)
+                Chip("Do every session", selected = every) { every = !every }
                 if (original != null) {
                     if (!confirmDelete) {
                         TextButton(onClick = { confirmDelete = true }) {
@@ -254,7 +258,7 @@ private fun ExerciseDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onSave(name, main, also.toList(), equip, Measure.ALL.filter { it in measures }) },
+                onClick = { onSave(name, main, also.toList(), equip, Measure.ALL.filter { it in measures }, every) },
                 enabled = name.isNotBlank(),
             ) { Text("Save") }
         },

@@ -88,9 +88,17 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
     fun allByRest(): List<AreaStatus> =
         areas.sortedWith(compareByDescending<AreaStatus> { it.days ?: Int.MAX_VALUE }.thenByDescending { it.ratio })
 
-    /** Movements whose main area is [areaId]: never-logged first, then the longest ago. */
+    /** His every-session routine (warmup etc.), in list order. Shown on Next whatever is due. */
+    fun everySession(): List<Movement> = data.exercises
+        .filter { !it.hidden && it.everySession }
+        .map { Movement(it, lastEx[it.id]) }
+
+    /**
+     * Movements whose main area is [areaId]: never-logged first, then the longest ago.
+     * Every-session movements are left out here because they have their own card.
+     */
     fun movements(areaId: String): List<Movement> = data.exercises
-        .filter { !it.hidden && it.mainArea == areaId }
+        .filter { !it.hidden && !it.everySession && it.mainArea == areaId }
         .map { Movement(it, lastEx[it.id]) }
         .sortedWith(compareBy<Movement>({ it.last != null }, { it.last?.date ?: "" }, { it.exercise.name.lowercase() }))
 }

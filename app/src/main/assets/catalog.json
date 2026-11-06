@@ -1,5 +1,5 @@
 {
- "catalogVersion": 4,
+ "catalogVersion": 5,
  "retired": [
   "incline-row"
  ],
@@ -978,7 +978,8 @@
    "measures": [
     "sets",
     "time"
-   ]
+   ],
+   "everySession": true
   },
   {
    "id": "90-90",

@@ -21,6 +21,10 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   weight in lb, time stored in seconds) plus a free note. Time is typed in minutes for cardio
   (`Exercise.timeInMinutes`: Conditioning, or measures speed/incline/resistance), seconds otherwise; "1:30" works in both.
   New picks are pre-filled with what he did last time.
+- **Every session** card at the top of Next: movements with `Exercise.everySession` (his routine; Asian squats
+  is his warmup). Always shown whatever is due, and left out of the area cards. Set per movement on the Exercises
+  tab ("Do every session"), or in `EVERY_SESSION` / an optional column F in the LIST tab for to_seed.py.
+  Catalog upgrades keep it on if either the list or his own setting has it on.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 

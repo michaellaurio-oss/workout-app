@@ -25,6 +25,7 @@ data class Area(val id: String, val label: String, val target: Int, val kind: St
 /**
  * A movement. [areas] lists the main area first, then areas it also works (partial credit).
  * [hidden] = removed from the lists but kept because history uses it.
+ * [everySession] = part of his routine (e.g. the Asian squat warmup): always shown at the top of Next.
  */
 data class Exercise(
     val id: String,
@@ -34,6 +35,7 @@ data class Exercise(
     val hidden: Boolean = false,
     /** What gets logged for it, from [Measure.ALL], in that order. */
     val measures: List<String> = Measure.DEFAULT,
+    val everySession: Boolean = false,
 ) {
     val mainArea: String get() = areas.firstOrNull() ?: ""
 
@@ -44,6 +46,7 @@ data class Exercise(
     fun toJson(): JSONObject = JSONObject().put("id", id).put("name", name)
         .put("areas", JSONArray(areas)).put("equip", equip).put("measures", JSONArray(measures))
         .apply { if (hidden) put("hidden", true) }
+        .apply { if (everySession) put("everySession", true) }
 
     companion object {
         fun fromJson(o: JSONObject) = Exercise(
@@ -52,6 +55,7 @@ data class Exercise(
             areas = o.optJSONArray("areas").strings(),
             equip = o.optString("equip", ""),
             hidden = o.optBoolean("hidden", false),
+            everySession = o.optBoolean("everySession", false),
             measures = o.optJSONArray("measures").strings().filter { it in Measure.ALL }.ifEmpty { Measure.DEFAULT },
         )
     }

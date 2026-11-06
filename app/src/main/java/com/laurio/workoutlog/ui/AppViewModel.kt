@@ -241,6 +241,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         also: List<String>,
         equip: String,
         measures: List<String>,
+        everySession: Boolean,
     ) {
         val cleanName = name.trim()
         if (cleanName.isEmpty()) return
@@ -250,10 +251,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             if (original == null) {
                 var id = cleanName.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifEmpty { "movement" }
                 while (d.exercises.any { it.id == id }) id += "-2"
-                d.copy(exercises = d.exercises + Exercise(id, cleanName, areas, equip.trim(), measures = ms))
+                d.copy(exercises = d.exercises + Exercise(id, cleanName, areas, equip.trim(), measures = ms, everySession = everySession))
             } else {
                 d.copy(exercises = d.exercises.map {
-                    if (it.id == original.id) it.copy(name = cleanName, areas = areas, equip = equip.trim(), measures = ms) else it
+                    if (it.id == original.id) it.copy(name = cleanName, areas = areas, equip = equip.trim(), measures = ms, everySession = everySession)
+                    else it
                 })
             }
         }

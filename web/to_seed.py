@@ -7,7 +7,7 @@ Bump CATALOG_VERSION whenever the exercise list changes, so phones that already 
 """
 import json, os, re, sys
 
-CATALOG_VERSION = 4
+CATALOG_VERSION = 5
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 AREAS = [  # id, label, target days, kind  (targets: Area Targets tab)
@@ -32,6 +32,9 @@ HIDDEN = [("xc-shoulders", "Crosscore shoulders", ["shoulders"], "Crosscore", ["
           ("shoulder-mobility", "Shoulder mobility", ["mobility", "shoulders"], "", ["sets", "reps"]),
           ("side-split", "Side split", ["mobility"], "", ["sets", "time"]),
           ("stretch", "General stretch", ["mobility"], "", ["time"])]
+# His every-session routine (shown at the top of Next). A column F "every session" (x / yes) in the
+# LIST tab adds more.
+EVERY_SESSION = {"asian-squat"}
 RETIRED = ["incline-row"]  # dropped and never logged
 # Old id -> the movement it was folded into (history moves over). Confirmed by Michael.
 MERGED = {"bosu-split-squat": "xc-split-squat"}
@@ -46,7 +49,9 @@ def catalog_from_xlsx(path, old_ids):
     rows = [r for r in openpyxl.load_workbook(path, read_only=True)["LIST"].iter_rows(min_row=2, values_only=True) if r[1]]
     by_name = {}
     exercises = []
-    for main, name, tool, also, measures in (tuple(r[:5]) for r in rows):
+    for r in rows:
+        main, name, tool, also, measures = tuple(r[:5])
+        every_col = str(r[5]).strip().lower() if len(r) > 5 and r[5] is not None else ""
         name = re.sub(r"\s+", " ", name).strip()
         key = name.lower()
         ex_id = ALIAS.get(key) or old_ids.get(key) or slug(name)
@@ -57,7 +62,10 @@ def catalog_from_xlsx(path, old_ids):
         ms = [m.strip().lower() for m in (measures or "time").split("/") if m.strip()]
         assert all(m in MEASURES for m in ms), (name, ms)
         tool = (tool or "").strip()
-        exercises.append({"id": ex_id, "name": name, "areas": areas, "equip": tool[:1].upper() + tool[1:], "measures": ms})
+        e = {"id": ex_id, "name": name, "areas": areas, "equip": tool[:1].upper() + tool[1:], "measures": ms}
+        if ex_id in EVERY_SESSION or every_col in ("x", "yes", "y", "true", "1", "every session"):
+            e["everySession"] = True
+        exercises.append(e)
     for i, n, a, e, ms in HIDDEN:
         exercises.append({"id": i, "name": n, "areas": a, "equip": e, "measures": ms, "hidden": True})
     ids = [e["id"] for e in exercises]
