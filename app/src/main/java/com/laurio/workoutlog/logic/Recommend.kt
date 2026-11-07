@@ -12,20 +12,26 @@ enum class Status(val label: String) { FRESH("Fresh"), SOON("Soon"), DUE("Due"),
 data class LastDone(val date: String, val groups: List<SetGroup>, val note: String)
 
 /**
- * How due an area is. [direct] = days since a movement whose main area this is (or an area-only log),
- * [secondary] = days since a movement that also works it. [days] is the effective figure:
- * secondary work counts as if it were half a target interval older.
+ * How due an area is. A day "resets" an area once its credits reach [RESET_CREDITS]: each movement
+ * counts 1 for its main area and 0.5 for each area it also works; an area-only log ("upper") counts
+ * as a full reset. [days] = days since the last reset (null = never). [partialDays]/[partialCredits]
+ * describe a more recent day that didn't reach a reset, if there is one.
  */
 data class AreaStatus(
     val area: Area,
     val days: Int?,
-    val direct: Int?,
-    val secondary: Int?,
+    val partialDays: Int?,
+    val partialCredits: Double,
     val ratio: Double,
     val status: Status,
 )
 
 data class Movement(val exercise: Exercise, val last: LastDone?)
+
+/** Credits a day needs in an area to reset its clock. */
+const val RESET_CREDITS = 2.0
+const val MAIN_CREDIT = 1.0
+const val ALSO_CREDIT = 0.5
 
 /** Everything the screens derive from the log: last time per movement and how due each area is. */
 class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
@@ -35,26 +41,27 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
     val areas: List<AreaStatus>
 
     init {
-        val lastDirect = HashMap<String, String>()
-        val lastSecondary = HashMap<String, String>()
+        val lastReset = HashMap<String, String>()
+        val lastPartial = HashMap<String, Pair<String, Double>>()
         for (s in data.sessions) {
             for (item in s.items) {
                 countEx[item.ex] = (countEx[item.ex] ?: 0) + 1
                 val prev = lastEx[item.ex]
                 if (prev == null || prev.date < s.date) lastEx[item.ex] = LastDone(s.date, item.groups, item.note)
-                val e = exById[item.ex] ?: continue
-                e.areas.forEachIndexed { i, a ->
-                    val m = if (i == 0) lastDirect else lastSecondary
-                    if ((m[a] ?: "") < s.date) m[a] = s.date
+            }
+            for ((a, credit) in creditsFor(s)) {
+                if (credit >= RESET_CREDITS) {
+                    if ((lastReset[a] ?: "") < s.date) lastReset[a] = s.date
+                } else if ((lastPartial[a]?.first ?: "") < s.date) {
+                    lastPartial[a] = s.date to credit
                 }
             }
-            for (a in s.areas) if ((lastDirect[a] ?: "") < s.date) lastDirect[a] = s.date
         }
         areas = data.areas.map { a ->
             val target = a.target.coerceAtLeast(1)
-            val direct = lastDirect[a.id]?.let { daysAgo(it) }
-            val secondary = lastSecondary[a.id]?.let { daysAgo(it) }
-            val days = listOfNotNull(direct, secondary?.let { it + (target + 1) / 2 }).minOrNull()
+            val reset = lastReset[a.id]
+            val days = reset?.let { daysAgo(it) }
+            val partial = lastPartial[a.id]?.takeIf { reset == null || it.first > reset }
             val ratio = if (days == null) 9.0 else days.toDouble() / target
             val status = when {
                 days == null || ratio >= 2 -> Status.OVERDUE
@@ -62,8 +69,21 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
                 ratio >= 0.75 -> Status.SOON
                 else -> Status.FRESH
             }
-            AreaStatus(a, days, direct, secondary, ratio, status)
+            AreaStatus(a, days, partial?.let { daysAgo(it.first) }, partial?.second ?: 0.0, ratio, status)
         }
+    }
+
+    /** Credits per area for one day. The same movement logged twice that day counts once. */
+    fun creditsFor(s: com.laurio.workoutlog.data.Session): Map<String, Double> {
+        val credits = HashMap<String, Double>()
+        for (id in s.items.map { it.ex }.distinct()) {
+            val e = exById[id] ?: continue
+            e.areas.distinct().forEachIndexed { i, a ->
+                credits[a] = (credits[a] ?: 0.0) + if (i == 0) MAIN_CREDIT else ALSO_CREDIT
+            }
+        }
+        for (a in s.areas) credits[a] = maxOf(credits[a] ?: 0.0, RESET_CREDITS)
+        return credits
     }
 
     fun daysAgo(date: String): Int = ChronoUnit.DAYS.between(LocalDate.parse(date), today).toInt()

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.laurio.workoutlog.data.AppData
 import com.laurio.workoutlog.logic.AreaStatus
 import com.laurio.workoutlog.logic.Movement
+import com.laurio.workoutlog.logic.RESET_CREDITS
 import com.laurio.workoutlog.logic.Stats
 import com.laurio.workoutlog.logic.ago
 import com.laurio.workoutlog.logic.formatDetail
@@ -162,19 +163,22 @@ private fun AreaRow(st: AreaStatus) {
         TargetBar(st.ratio, fg, Modifier.weight(1f))
         Spacer(Modifier.width(10.dp))
         Text(
-            st.direct?.let { ago(it) } ?: "none yet", Modifier.width(92.dp),
+            st.days?.let { ago(it) } ?: "none yet", Modifier.width(92.dp),
             style = MaterialTheme.typography.bodySmall, color = Muted, textAlign = TextAlign.End,
         )
     }
 }
 
 private fun whyText(s: AreaStatus): String {
-    if (s.days == null) return "No history yet"
-    val direct = s.direct
-    val secondary = s.secondary
-    return listOfNotNull(
-        if (direct != null) "direct ${ago(direct)}" else "never direct",
-        if (secondary != null && (direct == null || secondary < direct)) "as secondary ${ago(secondary)}" else null,
-        "target every ${s.area.target} days",
-    ).joinToString(" · ")
+    val parts = mutableListOf(
+        if (s.days == null) "no full session yet" else "full session ${ago(s.days)}",
+    )
+    if (s.partialDays != null) {
+        parts += "${credits(s.partialCredits)} of ${credits(RESET_CREDITS)} ${ago(s.partialDays)}"
+    }
+    parts += "target every ${s.area.target} days"
+    return parts.joinToString(" · ")
 }
+
+/** 1.0 -> "1", 1.5 -> "1.5" */
+private fun credits(c: Double): String = if (c % 1.0 == 0.0) c.toLong().toString() else c.toString()
