@@ -49,6 +49,7 @@ import com.laurio.workoutlog.data.Measure
 import com.laurio.workoutlog.logic.Stats
 import com.laurio.workoutlog.logic.MONTHS
 import com.laurio.workoutlog.logic.ago
+import com.laurio.workoutlog.logic.formatCredits
 import com.laurio.workoutlog.logic.formatMonths
 import java.time.LocalDate
 
@@ -72,7 +73,7 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
             ScreenTitle("Exercises")
             Text(
                 "Each movement sits under its main area. \"Also\" areas get partial credit. Tap a movement to rename it, " +
-                    "move it to another area, or delete it. \"Every N days\" sets how often an area comes up.",
+                    "move it to another area, or delete it. How often each area comes up is set on the Areas tab.",
                 style = MaterialTheme.typography.bodySmall, color = Muted,
             )
             Spacer(Modifier.height(8.dp))
@@ -88,7 +89,6 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
                 movements = data.exercises.filter { !it.hidden && it.mainArea == a.id }.sortedBy { it.name.lowercase() },
                 stats = stats,
                 areaNames = areaNames,
-                onTarget = { vm.setTarget(a.id, it) },
                 onEdit = { editing = it },
             )
         }
@@ -146,7 +146,6 @@ private fun AreaCard(
     movements: List<Exercise>,
     stats: Stats,
     areaNames: Map<String, String>,
-    onTarget: (Int) -> Unit,
     onEdit: (Exercise) -> Unit,
 ) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
@@ -156,9 +155,10 @@ private fun AreaCard(
                     area.label.uppercase(), Modifier.weight(1f),
                     style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
                 )
-                TextButton(onClick = { onTarget(area.target - 1) }, enabled = area.target > 1) { Text("−") }
-                Text("every ${area.target} days", style = MaterialTheme.typography.bodySmall, color = Muted)
-                TextButton(onClick = { onTarget(area.target + 1) }, enabled = area.target < 30) { Text("+") }
+                Text(
+                    "every ${area.target} days · ${formatCredits(area.credits)} credits",
+                    style = MaterialTheme.typography.bodySmall, color = Muted, modifier = Modifier.padding(end = 8.dp, top = 8.dp, bottom = 8.dp),
+                )
             }
             if (movements.isEmpty()) Text("No movements yet.", color = Muted, modifier = Modifier.padding(bottom = 8.dp))
             movements.forEach { e ->

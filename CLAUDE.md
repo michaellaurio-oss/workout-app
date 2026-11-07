@@ -9,12 +9,13 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - **Next tab answers two questions:** which body areas to work today, and within each, which movements
   he hasn't done recently (never-logged first, then oldest). Keep that front and center.
 - Areas (Chest, Back, Shoulders, Arms, Legs, Glutes & Hamstrings, Core, Conditioning, Mobility) each have a
-  target "every N days" (`Area.target`, editable on the Exercises tab).
+  target "every N days" (`Area.target`) and **credits needed** (`Area.credits`, default 2, 0.5 steps, 0.5–10),
+  both set on the **Areas tab** (`ui/AreasScreen.kt`). Catalog upgrades keep his values.
 - A movement's `areas` list = main area first, then areas it also works. **Credits** (his rule, 2026-11-07):
   each movement logged on a day gives 1 credit to its main area and 0.5 to each area it also works; a day
-  with 2+ credits in an area resets that area's clock (`RESET_CREDITS`, `MAIN_CREDIT`, `ALSO_CREDIT`,
+  reaching the area's credits needed resets that area's clock (`MAIN_CREDIT`, `ALSO_CREDIT`,
   `Stats.creditsFor` in `logic/Recommend.kt`). An area-only log ("upper") counts as a full reset. Days below
-  2 don't reset; Next shows the latest such day as "1 of 2".
+  it don't reset; Next shows the latest such day as "1 of 2".
 - Recommendation (`Stats.focus`): up to 3 strength areas at/over target and not worked in the last day,
   topped up to 2 with ones at >= 75% of target, plus Conditioning/Mobility when due.
   When nothing is due, the Next tab shows every area instead (`Stats.allByRest`), longest since worked
@@ -38,7 +39,7 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 
 Single-activity Jetpack Compose app, no DI, no database library (same pattern as Slam Log).
 
-- `MainActivity.kt`: bottom tabs (Next, Log, History, Exercises), snackbar, back goes to Next.
+- `MainActivity.kt`: bottom tabs (Next, Log, History, Exercises, Areas), snackbar, back goes to Next.
 - `ui/AppViewModel.kt`: holds `AppData`, the workout being logged (`picked`, `logDate`, `logNote`),
   all edits, backup export/import.
 - `data/Models.kt`: `Area`, `Exercise`, `SetGroup`, `Item`, `Session`, `AppData` with org.json (de)serialization.

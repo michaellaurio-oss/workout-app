@@ -48,6 +48,9 @@ fun timeForField(sec: Int, minutes: Boolean): String =
 
 private fun num(d: Double) = formatWeight(d)
 
+/** 2.0 -> "2", 1.5 -> "1.5" */
+fun formatCredits(c: Double): String = formatWeight(c)
+
 val MONTHS = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 /** [6,7,8,9] -> "Jun–Sep", [12,1,2] -> "Dec–Feb", [1,3] -> "Jan, Mar"; empty -> "" */

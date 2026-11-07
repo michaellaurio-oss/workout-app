@@ -12,7 +12,7 @@ enum class Status(val label: String) { FRESH("Fresh"), SOON("Soon"), DUE("Due"),
 data class LastDone(val date: String, val groups: List<SetGroup>, val note: String)
 
 /**
- * How due an area is. A day "resets" an area once its credits reach [RESET_CREDITS]: each movement
+ * How due an area is. A day "resets" an area once its credits reach the area's [Area.credits]: each movement
  * counts 1 for its main area and 0.5 for each area it also works; an area-only log ("upper") counts
  * as a full reset. [days] = days since the last reset (null = never). [partialDays]/[partialCredits]
  * describe a more recent day that didn't reach a reset, if there is one.
@@ -28,8 +28,6 @@ data class AreaStatus(
 
 data class Movement(val exercise: Exercise, val last: LastDone?)
 
-/** Credits a day needs in an area to reset its clock. */
-const val RESET_CREDITS = 2.0
 const val MAIN_CREDIT = 1.0
 const val ALSO_CREDIT = 0.5
 
@@ -39,6 +37,8 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
     val lastEx = HashMap<String, LastDone>()
     val countEx = HashMap<String, Int>()
     val areas: List<AreaStatus>
+
+    private val needed: Map<String, Double> = data.areas.associate { it.id to it.credits }
 
     init {
         val lastReset = HashMap<String, String>()
@@ -50,7 +50,7 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
                 if (prev == null || prev.date < s.date) lastEx[item.ex] = LastDone(s.date, item.groups, item.note)
             }
             for ((a, credit) in creditsFor(s)) {
-                if (credit >= RESET_CREDITS) {
+                if (credit >= (needed[a] ?: Area.DEFAULT_CREDITS) - 1e-9) {
                     if ((lastReset[a] ?: "") < s.date) lastReset[a] = s.date
                 } else if ((lastPartial[a]?.first ?: "") < s.date) {
                     lastPartial[a] = s.date to credit
@@ -82,7 +82,7 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
                 credits[a] = (credits[a] ?: 0.0) + if (i == 0) MAIN_CREDIT else ALSO_CREDIT
             }
         }
-        for (a in s.areas) credits[a] = maxOf(credits[a] ?: 0.0, RESET_CREDITS)
+        for (a in s.areas) credits[a] = maxOf(credits[a] ?: 0.0, needed[a] ?: Area.DEFAULT_CREDITS)
         return credits
     }
 

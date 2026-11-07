@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.laurio.workoutlog.data.AppData
+import com.laurio.workoutlog.data.Area
 import com.laurio.workoutlog.data.Exercise
 import com.laurio.workoutlog.data.Item
 import com.laurio.workoutlog.data.Measure
@@ -231,6 +232,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setTarget(areaId: String, days: Int) = change { d ->
         d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(target = days.coerceIn(1, 30)) else it })
+    }
+
+    fun setCredits(areaId: String, credits: Double) = change { d ->
+        val c = (Math.round(credits * 2) / 2.0).coerceIn(Area.MIN_CREDITS, Area.MAX_CREDITS)
+        d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(credits = c) else it })
     }
 
     /**

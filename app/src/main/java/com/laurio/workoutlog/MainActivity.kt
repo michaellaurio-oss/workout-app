@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.laurio.workoutlog.ui.AppViewModel
+import com.laurio.workoutlog.ui.AreasScreen
 import com.laurio.workoutlog.ui.ExercisesScreen
 import com.laurio.workoutlog.ui.HistoryScreen
 import com.laurio.workoutlog.ui.LogScreen
@@ -58,6 +60,7 @@ private enum class Tab(val label: String, val icon: ImageVector) {
     LOG("Log", Icons.Filled.Add),
     HISTORY("History", Icons.Filled.DateRange),
     EXERCISES("Exercises", Icons.Filled.Edit),
+    AREAS("Areas", Icons.Filled.Settings),
 }
 
 @Composable
@@ -112,6 +115,7 @@ private fun AppRoot(vm: AppViewModel) {
                     Tab.LOG -> LogScreen(d, vm, onSaved = { tab = Tab.NEXT })
                     Tab.HISTORY -> HistoryScreen(d, vm)
                     Tab.EXERCISES -> ExercisesScreen(d, vm)
+                    Tab.AREAS -> AreasScreen(d, vm)
                 }
             }
         }

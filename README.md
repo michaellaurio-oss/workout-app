@@ -8,7 +8,9 @@ Personal Android app for home-gym workouts.
   pre-filled from last time. "Add another line" when something changes partway, like a heavier weight.
   A note per movement, and workout notes. Log an area only when you didn't track movements.
 - **History**: every day logged, with delete for a day or a single movement.
-- **Exercises**: add, rename, move or delete movements; set how often each area should come up;
-  save or restore a backup file.
+- **Exercises**: add, rename, move or delete movements; save or restore a backup file.
+
+- **Areas**: for each body area, how often it should come up (every N days) and how many credits a day
+  needs to count as working it. A movement gives 1 credit to its main area and 0.5 to each area it also works.
 
 Build and install: plug in the phone and double-click `install.bat`.

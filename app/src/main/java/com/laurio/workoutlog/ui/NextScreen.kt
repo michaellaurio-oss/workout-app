@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.laurio.workoutlog.data.AppData
 import com.laurio.workoutlog.logic.AreaStatus
 import com.laurio.workoutlog.logic.Movement
-import com.laurio.workoutlog.logic.RESET_CREDITS
 import com.laurio.workoutlog.logic.Stats
 import com.laurio.workoutlog.logic.ago
 import com.laurio.workoutlog.logic.formatDetail
@@ -174,7 +173,7 @@ private fun whyText(s: AreaStatus): String {
         if (s.days == null) "no full session yet" else "full session ${ago(s.days)}",
     )
     if (s.partialDays != null) {
-        parts += "${credits(s.partialCredits)} of ${credits(RESET_CREDITS)} ${ago(s.partialDays)}"
+        parts += "${credits(s.partialCredits)} of ${credits(s.area.credits)} ${ago(s.partialDays)}"
     }
     parts += "target every ${s.area.target} days"
     return parts.joinToString(" · ")

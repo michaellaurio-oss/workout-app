@@ -10,7 +10,7 @@ package com.laurio.workoutlog.data
  * - Ids listed in "retired" (dropped and never used) are hidden if a workout uses them, otherwise removed.
  * - "merged" maps an old id to the movement it was folded into: logged workouts move over and the
  *   old movement goes away.
- * - Areas keep his targets; labels and new areas come from the list.
+ * - Areas keep his targets and credits needed; labels and new areas come from the list.
  * - Days from the starter history that he hasn't changed (same original text and number of
  *   movements) are replaced by the starter version, which picks up better-parsed numbers.
  */
@@ -52,7 +52,7 @@ object CatalogUpgrade {
         val exercises = listed + extras
 
         val oldAreas = data.areas.associateBy { it.id }
-        val areas = catalog.areas.map { a -> oldAreas[a.id]?.let { a.copy(target = it.target) } ?: a } +
+        val areas = catalog.areas.map { a -> oldAreas[a.id]?.let { a.copy(target = it.target, credits = it.credits) } ?: a } +
             data.areas.filter { a -> catalog.areas.none { it.id == a.id } }
 
         val seedByDate = history.associateBy { it.date }
