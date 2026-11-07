@@ -38,6 +38,7 @@ data class Area(val id: String, val label: String, val target: Int, val kind: St
  * [everySession] = part of his routine (e.g. the Asian squat warmup): always shown at the top of Next.
  * [pinned] = always first in its area's list (e.g. slam balls, his main cardio).
  * [months] = months it's offered (1-12, e.g. paddleboarding Jun-Sep); empty = all year.
+ * [video] = link to an instruction video (YouTube etc.), "" if none.
  */
 data class Exercise(
     val id: String,
@@ -50,6 +51,7 @@ data class Exercise(
     val everySession: Boolean = false,
     val pinned: Boolean = false,
     val months: List<Int> = emptyList(),
+    val video: String = "",
 ) {
     fun inSeason(month: Int): Boolean = months.isEmpty() || month in months
 
@@ -65,6 +67,7 @@ data class Exercise(
         .apply { if (everySession) put("everySession", true) }
         .apply { if (pinned) put("pinned", true) }
         .apply { if (months.isNotEmpty()) put("months", JSONArray(months)) }
+        .apply { if (video.isNotBlank()) put("video", video) }
 
     companion object {
         fun fromJson(o: JSONObject) = Exercise(
@@ -76,6 +79,7 @@ data class Exercise(
             everySession = o.optBoolean("everySession", false),
             pinned = o.optBoolean("pinned", false),
             months = o.optJSONArray("months").ints().filter { it in 1..12 }.distinct().sorted(),
+            video = o.optString("video", "").trim(),
             measures = o.optJSONArray("measures").strings().filter { it in Measure.ALL }.ifEmpty { Measure.DEFAULT },
         )
     }

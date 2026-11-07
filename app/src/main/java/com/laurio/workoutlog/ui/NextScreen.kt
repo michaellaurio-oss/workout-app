@@ -138,6 +138,7 @@ private fun MovementRow(m: Movement, stats: Stats, checked: Boolean, onToggle: (
                 Text(m.exercise.equip, style = MaterialTheme.typography.bodySmall, color = Muted)
             }
         }
+        VideoButton(m.exercise.video, m.exercise.name)
         Spacer(Modifier.width(8.dp))
         Column(horizontalAlignment = Alignment.End) {
             val last = m.last

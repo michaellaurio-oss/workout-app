@@ -179,6 +179,7 @@ private fun AreaCard(
                         ).joinToString(" · ")
                         if (sub.isNotEmpty()) Text(sub, style = MaterialTheme.typography.bodySmall, color = Muted)
                     }
+                    VideoButton(e.video, e.name)
                     val last = stats.lastEx[e.id]
                     Text(
                         if (last == null) "never" else "${ago(stats.daysAgo(last.date))} · ${stats.countEx[e.id] ?: 0}×",
@@ -204,6 +205,7 @@ private fun ExerciseDialog(
     var main by remember { mutableStateOf(original?.mainArea ?: areas.first().id) }
     val also = remember { mutableStateListOf<String>().apply { original?.areas?.drop(1)?.let { addAll(it) } } }
     var equip by remember { mutableStateOf(original?.equip ?: "") }
+    var video by remember { mutableStateOf(original?.video ?: "") }
     val measures = remember { mutableStateListOf<String>().apply { addAll(original?.measures ?: Measure.DEFAULT) } }
     var confirmDelete by remember { mutableStateOf(false) }
     var every by remember { mutableStateOf(original?.everySession ?: false) }
@@ -231,6 +233,11 @@ private fun ExerciseDialog(
                 }
                 OutlinedTextField(
                     value = equip, onValueChange = { equip = it }, label = { Text("Equipment (optional)") },
+                    singleLine = true, modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = video, onValueChange = { video = it }, label = { Text("Video link (optional)") },
+                    placeholder = { Text("https://youtu.be/…") },
                     singleLine = true, modifier = Modifier.fillMaxWidth(),
                 )
                 Text("What you log for it", style = MaterialTheme.typography.labelLarge, color = Muted)
@@ -284,6 +291,7 @@ private fun ExerciseDialog(
                             name = name,
                             areas = listOf(main) + also.filter { it != main },
                             equip = equip,
+                            video = video,
                             measures = Measure.ALL.filter { it in measures },
                             everySession = every,
                             pinned = pinned,

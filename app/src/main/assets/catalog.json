@@ -1,5 +1,5 @@
 {
- "catalogVersion": 6,
+ "catalogVersion": 7,
  "retired": [
   "incline-row"
  ],
@@ -316,19 +316,6 @@
    ]
   },
   {
-   "id": "cross-body-curls",
-   "name": "Cross body curls",
-   "areas": [
-    "arms"
-   ],
-   "equip": "Bands, anchored low",
-   "measures": [
-    "sets",
-    "reps",
-    "band"
-   ]
-  },
-  {
    "id": "xc-curl-forehead",
    "name": "Curl to forehead",
    "areas": [
@@ -364,6 +351,19 @@
     "sets",
     "reps",
     "weight"
+   ]
+  },
+  {
+   "id": "cross-body-curls",
+   "name": "Cross body curls",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Bands, anchored low",
+   "measures": [
+    "sets",
+    "reps",
+    "band"
    ]
   },
   {
@@ -553,7 +553,8 @@
     "sets",
     "reps",
     "weight"
-   ]
+   ],
+   "video": "https://youtu.be/RyHK_e9Ypbw?t=23"
   },
   {
    "id": "sl-back",
@@ -567,7 +568,8 @@
     "sets",
     "reps",
     "weight"
-   ]
+   ],
+   "video": "https://youtu.be/RyHK_e9Ypbw?t=107"
   },
   {
    "id": "sl-side",
@@ -581,7 +583,8 @@
     "sets",
     "reps",
     "weight"
-   ]
+   ],
+   "video": "https://youtu.be/RyHK_e9Ypbw?t=158"
   },
   {
    "id": "sl-curtsey",
@@ -595,7 +598,8 @@
     "sets",
     "reps",
     "weight"
-   ]
+   ],
+   "video": "https://youtu.be/RyHK_e9Ypbw?t=209"
   },
   {
    "id": "sl-stand",
@@ -804,7 +808,8 @@
     "sets",
     "reps",
     "weight"
-   ]
+   ],
+   "video": "https://youtu.be/D6Ed9jmniqw"
   },
   {
    "id": "hollow-body-hold",
@@ -946,6 +951,19 @@
    ]
   },
   {
+   "id": "walk",
+   "name": "Walk",
+   "areas": [
+    "conditioning"
+   ],
+   "equip": "",
+   "measures": [
+    "speed",
+    "incline",
+    "time"
+   ]
+  },
+  {
    "id": "paddle",
    "name": "Paddleboarding",
    "areas": [
@@ -960,19 +978,6 @@
     7,
     8,
     9
-   ]
-  },
-  {
-   "id": "walk",
-   "name": "Walk",
-   "areas": [
-    "conditioning"
-   ],
-   "equip": "",
-   "measures": [
-    "speed",
-    "incline",
-    "time"
    ]
   },
   {
@@ -1023,7 +1028,8 @@
    "measures": [
     "sets",
     "reps"
-   ]
+   ],
+   "video": "https://youtu.be/Xq_9d0DvrSY?t=42"
   },
   {
    "id": "horse-stance",

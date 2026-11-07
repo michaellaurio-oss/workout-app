@@ -32,6 +32,9 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - `Exercise.pinned`: always first in its area's list (slam balls, his main cardio). `Exercise.months`: months it's
   offered (paddleboarding Jun–Sep); out of season it's left off Next and the Log search but stays in History and
   the Exercises tab. Both editable in the movement dialog, or columns G and H in the LIST tab.
+- `Exercise.video`: instruction-video link; a ▶ button (`VideoButton` in `ui/Components.kt`) opens it on Next,
+  in the Log card and on the Exercises tab. Editable in the movement dialog; kept from his data on upgrade if the
+  list has none.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 
@@ -53,7 +56,8 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 
 - The exercise list's source is the **LIST tab of `exercise catalog.xlsx`** (his spreadsheet, on his PC,
   git-ignored), grouped by area in the app's order. Columns: A main area, B exercise, C tool, D also works,
-  E measures, F every session (x), G always first (x), H season ("Jun-Sep", blank = all year).
+  E measures, F every session (x), G always first (x), H season ("Jun-Sep", blank = all year), and a
+  "Video" column (found by header) with an instruction-video link.
   Never write the spreadsheet while he has it open in Excel; stage it fresh, write via a uniquely named
   output file with `expectedMtimeMs`, and check the md5 on his PC afterwards (a stale copy once overwrote it).
 - `app/src/main/assets/catalog.json` (committed): body areas and the exercise list, with `catalogVersion`

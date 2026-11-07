@@ -120,6 +120,7 @@ fun LogScreen(data: AppData, vm: AppViewModel, onSaved: () -> Unit) {
                                 style = MaterialTheme.typography.bodySmall, color = Muted,
                             )
                         }
+                        if (ex != null) VideoButton(ex.video, ex.name)
                         IconButton(onClick = { vm.togglePick(p.ex) }) { Icon(Icons.Filled.Close, contentDescription = "Remove") }
                     }
                     p.groups.forEachIndexed { i, g ->

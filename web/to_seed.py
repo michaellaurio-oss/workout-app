@@ -7,7 +7,7 @@ Bump CATALOG_VERSION whenever the exercise list changes, so phones that already 
 """
 import json, os, re, sys
 
-CATALOG_VERSION = 6
+CATALOG_VERSION = 7
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 AREAS = [  # id, label, target days, kind  (targets: Area Targets tab)
@@ -33,7 +33,8 @@ HIDDEN = [("xc-shoulders", "Crosscore shoulders", ["shoulders"], "Crosscore", ["
           ("side-split", "Side split", ["mobility"], "", ["sets", "time"]),
           ("stretch", "General stretch", ["mobility"], "", ["time"])]
 # LIST tab columns: A main area, B exercise, C tool, D also works, E measures,
-# F every session (x), G always first (x), H season (e.g. "Jun-Sep", blank = all year).
+# F every session (x), G always first (x), H season (e.g. "Jun-Sep", blank = all year),
+# plus a "Video" column (found by its header) with a link to an instruction video.
 EVERY_SESSION = set()  # extra every-session ids beyond column F
 # Settings the LIST tab has no column for. (Pinned and season now live in columns G and H.)
 OVERRIDES = {}
@@ -66,10 +67,20 @@ def slug(s):
 
 def catalog_from_xlsx(path, old_ids):
     import openpyxl
-    rows = [r for r in openpyxl.load_workbook(path, read_only=True)["LIST"].iter_rows(min_row=2, values_only=True) if len(r) > 1 and r[1]]
+    sheet = openpyxl.load_workbook(path)["LIST"]
+    header = [str(c.value or "").strip().lower() for c in sheet[1]]
+    video_col = header.index("video") if "video" in header else None
+    rows, videos = [], []
+    for cells in sheet.iter_rows(min_row=2):
+        r = tuple(c.value for c in cells)
+        if len(r) > 1 and r[1]:
+            rows.append(r)
+            v = cells[video_col] if video_col is not None and video_col < len(cells) else None
+            link = (v.hyperlink.target if v is not None and v.hyperlink else None) or (str(v.value).strip() if v is not None and v.value else "")
+            videos.append(link if link.startswith("http") else "")
     by_name = {}
     exercises = []
-    for r in rows:
+    for r, video in zip(rows, videos):
         main, name, tool, also, measures = tuple(r[:5])
         col = lambda i: str(r[i]).strip() if len(r) > i and r[i] is not None else ""
         name = re.sub(r"\s+", " ", name).strip()
@@ -89,6 +100,8 @@ def catalog_from_xlsx(path, old_ids):
             e["pinned"] = True
         if parse_season(col(7)):
             e["months"] = parse_season(col(7))
+        if video:
+            e["video"] = video
         e.update(OVERRIDES.get(ex_id, {}))
         exercises.append(e)
     for i, n, a, e, ms in HIDDEN:

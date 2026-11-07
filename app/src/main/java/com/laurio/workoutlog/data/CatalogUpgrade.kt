@@ -38,6 +38,7 @@ object CatalogUpgrade {
                 everySession = e.everySession || m.everySession,
                 pinned = e.pinned || m.pinned,
                 months = e.months.ifEmpty { m.months },
+                video = e.video.ifBlank { m.video },
             )
         }
         val listedIds = listed.map { it.id }.toSet()

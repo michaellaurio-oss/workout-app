@@ -250,6 +250,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             name = cleanName,
             areas = draft.areas.distinct(),
             equip = draft.equip.trim(),
+            video = draft.video.trim(),
             measures = Measure.ALL.filter { it in draft.measures }.ifEmpty { Measure.DEFAULT },
             months = draft.months.filter { it in 1..12 }.distinct().sorted().let { if (it.size == 12) emptyList() else it },
         )
