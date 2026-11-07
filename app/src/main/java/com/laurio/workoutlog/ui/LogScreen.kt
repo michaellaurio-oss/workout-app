@@ -53,7 +53,7 @@ fun LogScreen(data: AppData, vm: AppViewModel, onSaved: () -> Unit) {
     var search by rememberSaveable { mutableStateOf("") }
     val q = search.trim().lowercase()
     val hits = if (q.isEmpty()) emptyList() else data.exercises
-        .filter { !it.hidden && it.name.lowercase().contains(q) && !vm.isPicked(it.id) }
+        .filter { !it.hidden && it.inSeason(LocalDate.now().monthValue) && it.name.lowercase().contains(q) && !vm.isPicked(it.id) }
         .take(8)
     val today = LocalDate.now()
 

@@ -7,7 +7,7 @@ Bump CATALOG_VERSION whenever the exercise list changes, so phones that already 
 """
 import json, os, re, sys
 
-CATALOG_VERSION = 5
+CATALOG_VERSION = 6
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 AREAS = [  # id, label, target days, kind  (targets: Area Targets tab)
@@ -35,6 +35,11 @@ HIDDEN = [("xc-shoulders", "Crosscore shoulders", ["shoulders"], "Crosscore", ["
 # His every-session routine (shown at the top of Next). A column F "every session" (x / yes) in the
 # LIST tab adds more.
 EVERY_SESSION = {"asian-squat"}
+# Settings the LIST tab has no column for (he asked for these in chat).
+OVERRIDES = {
+    "paddle": {"name": "Paddleboarding", "months": [6, 7, 8, 9]},  # only offered June-September
+    "slam-ball": {"pinned": True},  # his main cardio: always first in Conditioning
+}
 RETIRED = ["incline-row"]  # dropped and never logged
 # Old id -> the movement it was folded into (history moves over). Confirmed by Michael.
 MERGED = {"bosu-split-squat": "xc-split-squat"}
@@ -65,6 +70,7 @@ def catalog_from_xlsx(path, old_ids):
         e = {"id": ex_id, "name": name, "areas": areas, "equip": tool[:1].upper() + tool[1:], "measures": ms}
         if ex_id in EVERY_SESSION or every_col in ("x", "yes", "y", "true", "1", "every session"):
             e["everySession"] = True
+        e.update(OVERRIDES.get(ex_id, {}))
         exercises.append(e)
     for i, n, a, e, ms in HIDDEN:
         exercises.append({"id": i, "name": n, "areas": a, "equip": e, "measures": ms, "hidden": True})

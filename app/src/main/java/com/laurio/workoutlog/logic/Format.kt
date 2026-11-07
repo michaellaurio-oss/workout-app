@@ -48,6 +48,21 @@ fun timeForField(sec: Int, minutes: Boolean): String =
 
 private fun num(d: Double) = formatWeight(d)
 
+val MONTHS = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/** [6,7,8,9] -> "Jun–Sep", [12,1,2] -> "Dec–Feb", [1,3] -> "Jan, Mar"; empty -> "" */
+fun formatMonths(months: List<Int>): String {
+    val set = months.filter { it in 1..12 }.toSet()
+    if (set.isEmpty() || set.size == 12) return ""
+    // Start a run at a month whose previous month isn't included, so Dec-Feb wraps correctly.
+    val starts = (1..12).filter { it in set && ((it + 10) % 12 + 1) !in set }
+    return starts.joinToString(", ") { start ->
+        var end = start
+        while ((end % 12 + 1) in set && (end % 12 + 1) != start) end = end % 12 + 1
+        if (end == start) MONTHS[start - 1] else "${MONTHS[start - 1]}–${MONTHS[end - 1]}"
+    }
+}
+
 /** "4×12 @ 40 lb", "4 sets · 45s", "30 min · level 6", "3.5 mph · 4% incline · 30 min" */
 fun formatGroup(g: SetGroup): String {
     val sr = when {

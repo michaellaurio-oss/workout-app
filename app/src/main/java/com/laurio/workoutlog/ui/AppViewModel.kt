@@ -233,29 +233,28 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(target = days.coerceIn(1, 30)) else it })
     }
 
-    /** Adds a movement ([original] == null) or edits one. History keeps pointing at the same id. */
-    fun saveExercise(
-        original: Exercise?,
-        name: String,
-        mainArea: String,
-        also: List<String>,
-        equip: String,
-        measures: List<String>,
-        everySession: Boolean,
-    ) {
-        val cleanName = name.trim()
+    /**
+     * Adds a movement ([original] == null) or edits one, from the dialog's [draft] (its id is ignored).
+     * History keeps pointing at the same id.
+     */
+    fun saveExercise(original: Exercise?, draft: Exercise) {
+        val cleanName = draft.name.trim()
         if (cleanName.isEmpty()) return
-        val areas = listOf(mainArea) + also.filter { it != mainArea }.distinct()
-        val ms = Measure.ALL.filter { it in measures }.ifEmpty { Measure.DEFAULT }
+        val clean = draft.copy(
+            name = cleanName,
+            areas = draft.areas.distinct(),
+            equip = draft.equip.trim(),
+            measures = Measure.ALL.filter { it in draft.measures }.ifEmpty { Measure.DEFAULT },
+            months = draft.months.filter { it in 1..12 }.distinct().sorted().let { if (it.size == 12) emptyList() else it },
+        )
         change(if (original == null) "Added $cleanName" else "Saved $cleanName") { d ->
             if (original == null) {
                 var id = cleanName.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifEmpty { "movement" }
                 while (d.exercises.any { it.id == id }) id += "-2"
-                d.copy(exercises = d.exercises + Exercise(id, cleanName, areas, equip.trim(), measures = ms, everySession = everySession))
+                d.copy(exercises = d.exercises + clean.copy(id = id, hidden = false))
             } else {
                 d.copy(exercises = d.exercises.map {
-                    if (it.id == original.id) it.copy(name = cleanName, areas = areas, equip = equip.trim(), measures = ms, everySession = everySession)
-                    else it
+                    if (it.id == original.id) clean.copy(id = original.id, hidden = original.hidden) else it
                 })
             }
         }

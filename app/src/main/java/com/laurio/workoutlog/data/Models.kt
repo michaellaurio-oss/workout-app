@@ -26,6 +26,8 @@ data class Area(val id: String, val label: String, val target: Int, val kind: St
  * A movement. [areas] lists the main area first, then areas it also works (partial credit).
  * [hidden] = removed from the lists but kept because history uses it.
  * [everySession] = part of his routine (e.g. the Asian squat warmup): always shown at the top of Next.
+ * [pinned] = always first in its area's list (e.g. slam balls, his main cardio).
+ * [months] = months it's offered (1-12, e.g. paddleboarding Jun-Sep); empty = all year.
  */
 data class Exercise(
     val id: String,
@@ -36,7 +38,11 @@ data class Exercise(
     /** What gets logged for it, from [Measure.ALL], in that order. */
     val measures: List<String> = Measure.DEFAULT,
     val everySession: Boolean = false,
+    val pinned: Boolean = false,
+    val months: List<Int> = emptyList(),
 ) {
+    fun inSeason(month: Int): Boolean = months.isEmpty() || month in months
+
     val mainArea: String get() = areas.firstOrNull() ?: ""
 
     /** Cardio-type time is entered in minutes; holds and hangs in seconds. */
@@ -47,6 +53,8 @@ data class Exercise(
         .put("areas", JSONArray(areas)).put("equip", equip).put("measures", JSONArray(measures))
         .apply { if (hidden) put("hidden", true) }
         .apply { if (everySession) put("everySession", true) }
+        .apply { if (pinned) put("pinned", true) }
+        .apply { if (months.isNotEmpty()) put("months", JSONArray(months)) }
 
     companion object {
         fun fromJson(o: JSONObject) = Exercise(
@@ -56,6 +64,8 @@ data class Exercise(
             equip = o.optString("equip", ""),
             hidden = o.optBoolean("hidden", false),
             everySession = o.optBoolean("everySession", false),
+            pinned = o.optBoolean("pinned", false),
+            months = o.optJSONArray("months").ints().filter { it in 1..12 }.distinct().sorted(),
             measures = o.optJSONArray("measures").strings().filter { it in Measure.ALL }.ifEmpty { Measure.DEFAULT },
         )
     }
@@ -221,6 +231,9 @@ data class AppData(
         }
     }
 }
+
+private fun JSONArray?.ints(): List<Int> =
+    if (this == null) emptyList() else (0 until length()).map { getInt(it) }
 
 private fun JSONArray?.strings(): List<String> =
     if (this == null) emptyList() else (0 until length()).map { getString(it) }

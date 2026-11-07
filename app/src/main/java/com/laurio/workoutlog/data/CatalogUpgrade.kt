@@ -29,9 +29,17 @@ object CatalogUpgrade {
             else s.copy(items = s.items.map { i -> merged[i.ex]?.let { i.copy(ex = it) } ?: i })
         }
 
-        // "Every session" stays on if either the list or his own setting turns it on.
+        // "Every session" and "pinned" stay on if either the list or his own setting turns them on;
+        // his season months stay unless the list sets some.
         val mine = data.exercises.associateBy { it.id }
-        val listed = catalog.exercises.map { e -> if (mine[e.id]?.everySession == true) e.copy(everySession = true) else e }
+        val listed = catalog.exercises.map { e ->
+            val m = mine[e.id] ?: return@map e
+            e.copy(
+                everySession = e.everySession || m.everySession,
+                pinned = e.pinned || m.pinned,
+                months = e.months.ifEmpty { m.months },
+            )
+        }
         val listedIds = listed.map { it.id }.toSet()
         val used = remapped.flatMap { s -> s.items.map { it.ex } }.toSet()
         val extras = data.exercises.filter { it.id !in listedIds && it.id !in merged }.mapNotNull { e ->

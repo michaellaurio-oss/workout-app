@@ -25,6 +25,10 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   is his warmup). Always shown whatever is due, and left out of the area cards. Set per movement on the Exercises
   tab ("Do every session"), or in `EVERY_SESSION` / an optional column F in the LIST tab for to_seed.py.
   Catalog upgrades keep it on if either the list or his own setting has it on.
+- `Exercise.pinned`: always first in its area's list (slam balls, his main cardio). `Exercise.months`: months it's
+  offered (paddleboarding Jun–Sep); out of season it's left off Next and the Log search but stays in History and
+  the Exercises tab. Both editable in the movement dialog; settings the LIST tab has no column for live in
+  `OVERRIDES` in to_seed.py.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 

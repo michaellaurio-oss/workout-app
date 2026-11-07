@@ -1,5 +1,5 @@
 {
- "catalogVersion": 5,
+ "catalogVersion": 6,
  "retired": [
   "incline-row"
  ],
@@ -916,7 +916,8 @@
     "sets",
     "reps",
     "weight"
-   ]
+   ],
+   "pinned": true
   },
   {
    "id": "rowing",
@@ -946,13 +947,19 @@
   },
   {
    "id": "paddle",
-   "name": "Paddle",
+   "name": "Paddleboarding",
    "areas": [
     "conditioning"
    ],
    "equip": "",
    "measures": [
     "time"
+   ],
+   "months": [
+    6,
+    7,
+    8,
+    9
    ]
   },
   {
