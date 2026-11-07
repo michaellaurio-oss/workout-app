@@ -26,12 +26,11 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   New picks are pre-filled with what he did last time.
 - **Every session** card at the top of Next: movements with `Exercise.everySession` (his routine; Asian squats
   is his warmup). Always shown whatever is due, and left out of the area cards. Set per movement on the Exercises
-  tab ("Do every session"), or in `EVERY_SESSION` / an optional column F in the LIST tab for to_seed.py.
+  tab ("Do every session"), or column F in the LIST tab.
   Catalog upgrades keep it on if either the list or his own setting has it on.
 - `Exercise.pinned`: always first in its area's list (slam balls, his main cardio). `Exercise.months`: months it's
   offered (paddleboarding Jun–Sep); out of season it's left off Next and the Log search but stays in History and
-  the Exercises tab. Both editable in the movement dialog; settings the LIST tab has no column for live in
-  `OVERRIDES` in to_seed.py.
+  the Exercises tab. Both editable in the movement dialog, or columns G and H in the LIST tab.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 
@@ -52,7 +51,10 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 ## Starter data
 
 - The exercise list's source is the **LIST tab of `exercise catalog.xlsx`** (his spreadsheet, on his PC,
-  git-ignored): main area, exercise, tool, also works, measures.
+  git-ignored), grouped by area in the app's order. Columns: A main area, B exercise, C tool, D also works,
+  E measures, F every session (x), G always first (x), H season ("Jun-Sep", blank = all year).
+  Never write the spreadsheet while he has it open in Excel; stage it fresh, write via a uniquely named
+  output file with `expectedMtimeMs`, and check the md5 on his PC afterwards (a stale copy once overwrote it).
 - `app/src/main/assets/catalog.json` (committed): body areas and the exercise list, with `catalogVersion`
   `retired` and `merged` (old id -> the movement it was folded into; history moves over on upgrade).
   Movements he dropped that history uses are kept with `hidden: true`.

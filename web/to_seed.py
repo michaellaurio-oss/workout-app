@@ -32,14 +32,29 @@ HIDDEN = [("xc-shoulders", "Crosscore shoulders", ["shoulders"], "Crosscore", ["
           ("shoulder-mobility", "Shoulder mobility", ["mobility", "shoulders"], "", ["sets", "reps"]),
           ("side-split", "Side split", ["mobility"], "", ["sets", "time"]),
           ("stretch", "General stretch", ["mobility"], "", ["time"])]
-# His every-session routine (shown at the top of Next). A column F "every session" (x / yes) in the
-# LIST tab adds more.
-EVERY_SESSION = {"asian-squat"}
-# Settings the LIST tab has no column for (he asked for these in chat).
-OVERRIDES = {
-    "paddle": {"name": "Paddleboarding", "months": [6, 7, 8, 9]},  # only offered June-September
-    "slam-ball": {"pinned": True},  # his main cardio: always first in Conditioning
-}
+# LIST tab columns: A main area, B exercise, C tool, D also works, E measures,
+# F every session (x), G always first (x), H season (e.g. "Jun-Sep", blank = all year).
+EVERY_SESSION = set()  # extra every-session ids beyond column F
+# Settings the LIST tab has no column for. (Pinned and season now live in columns G and H.)
+OVERRIDES = {}
+MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+YES = ("x", "yes", "y", "true", "1")
+
+
+def parse_season(text):
+    """'Jun-Sep' -> [6,7,8,9]; 'Dec-Feb' wraps; 'Jan, Mar' -> [1,3]; blank -> [] (all year)."""
+    months = []
+    for part in (text or "").replace("–", "-").split(","):
+        part = part.strip().lower()
+        if not part: continue
+        a, _, b = part.partition("-")
+        start, end = MONTHS.index(a.strip()[:3]) + 1, MONTHS.index((b or a).strip()[:3]) + 1
+        m = start
+        while True:
+            months.append(m)
+            if m == end: break
+            m = m % 12 + 1
+    return sorted(set(months))
 RETIRED = ["incline-row"]  # dropped and never logged
 # Old id -> the movement it was folded into (history moves over). Confirmed by Michael.
 MERGED = {"bosu-split-squat": "xc-split-squat"}
@@ -51,12 +66,12 @@ def slug(s):
 
 def catalog_from_xlsx(path, old_ids):
     import openpyxl
-    rows = [r for r in openpyxl.load_workbook(path, read_only=True)["LIST"].iter_rows(min_row=2, values_only=True) if r[1]]
+    rows = [r for r in openpyxl.load_workbook(path, read_only=True)["LIST"].iter_rows(min_row=2, values_only=True) if len(r) > 1 and r[1]]
     by_name = {}
     exercises = []
     for r in rows:
         main, name, tool, also, measures = tuple(r[:5])
-        every_col = str(r[5]).strip().lower() if len(r) > 5 and r[5] is not None else ""
+        col = lambda i: str(r[i]).strip() if len(r) > i and r[i] is not None else ""
         name = re.sub(r"\s+", " ", name).strip()
         key = name.lower()
         ex_id = ALIAS.get(key) or old_ids.get(key) or slug(name)
@@ -68,8 +83,12 @@ def catalog_from_xlsx(path, old_ids):
         assert all(m in MEASURES for m in ms), (name, ms)
         tool = (tool or "").strip()
         e = {"id": ex_id, "name": name, "areas": areas, "equip": tool[:1].upper() + tool[1:], "measures": ms}
-        if ex_id in EVERY_SESSION or every_col in ("x", "yes", "y", "true", "1", "every session"):
+        if ex_id in EVERY_SESSION or col(5).lower() in YES:
             e["everySession"] = True
+        if col(6).lower() in YES:
+            e["pinned"] = True
+        if parse_season(col(7)):
+            e["months"] = parse_season(col(7))
         e.update(OVERRIDES.get(ex_id, {}))
         exercises.append(e)
     for i, n, a, e, ms in HIDDEN:
