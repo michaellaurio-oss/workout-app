@@ -153,7 +153,7 @@ fun LogScreen(data: AppData, vm: AppViewModel, onSaved: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         TextButton(onClick = { vm.addGroup(p.ex) }) {
                             Icon(Icons.Filled.Add, contentDescription = null)
-                            Text("Another weight")
+                            Text("Add another line")
                         }
                     }
                     OutlinedTextField(
