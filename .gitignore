@@ -15,3 +15,5 @@ app/src/main/assets/history.json
 *.xlsx
 web/sessions.json
 web/seed.py
+# Backups saved from the phone hold his workout log
+workout-log-backup*.json
