@@ -131,7 +131,7 @@ fun InsightsScreen(data: AppData) {
                 SectionLabel("Areas on schedule")
                 InsightCard {
                     Text(
-                        "Share of days each area wasn't past its every-N-days target. Lowest first.",
+                        "Share of days each area was on track with its every-N-days target. Best first.",
                         style = MaterialTheme.typography.bodySmall, color = Muted,
                     )
                     balance.forEach { BalanceRow(it) }

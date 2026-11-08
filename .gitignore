@@ -18,3 +18,7 @@ web/seed.py
 # Backups saved from the phone hold his workout log
 workout-log-backup*.json
 _to_delete/
+
+# His older log, mapped by hand (personal)
+web/seed_history.py
+__pycache__/

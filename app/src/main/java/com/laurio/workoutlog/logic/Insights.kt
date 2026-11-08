@@ -38,7 +38,9 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
     /** First day anything was logged, or null for an empty log. */
     val firstDay: LocalDate? = data.sessions.minOfOrNull { it.date }?.let { LocalDate.parse(it) }
 
-    private fun isWorkout(s: Session?) = s != null && (s.items.isNotEmpty() || s.areas.isNotEmpty())
+    /** A day with movements or areas logged, or one tagged "workout" (old log days with no details). */
+    private fun isWorkout(s: Session?) =
+        s != null && (s.items.isNotEmpty() || s.areas.isNotEmpty() || s.tag.equals("workout", ignoreCase = true))
     private fun isInjury(s: Session?) = s != null && !isWorkout(s) && s.tag.equals("injury", ignoreCase = true)
 
     fun cell(date: LocalDate): DayCell {
@@ -109,7 +111,7 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
         return if (start.isBefore(first)) first else start
     }
 
-    /** Each area's share of days on schedule in the window, lowest first. */
+    /** Each area's share of days on schedule in the window, best first. */
     fun balance(windowDays: Int?): List<AreaBalance> {
         val start = windowStart(windowDays)?.toEpochDay() ?: return emptyList()
         val first = firstDay!!.toEpochDay()
@@ -130,7 +132,7 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
             }
             val pct = if (counted == 0) 0 else Math.round(onTime * 100.0 / counted).toInt()
             AreaBalance(a, pct, resets.count { it in start..todayDay })
-        }.sortedWith(compareBy<AreaBalance> { it.onTimePct }.thenBy { it.area.label })
+        }.sortedWith(compareByDescending<AreaBalance> { it.onTimePct }.thenBy { it.area.label })
     }
 
     /** Movements done on the most days in the window (every-session routine left out). */
@@ -148,11 +150,11 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
 
     private fun offered(e: Exercise) = !e.hidden && !e.everySession && e.inSeason(today.monthValue)
 
-    /** Movements done before but not in the last [days] days, longest ago first. */
+    /** Movements done before but not in the last [days] days, most recent first. */
     fun stale(days: Int = STALE_DAYS): List<StaleMovement> = data.exercises.filter { offered(it) }
         .mapNotNull { e -> stats.lastEx[e.id]?.let { StaleMovement(e, stats.daysAgo(it.date)) } }
         .filter { it.daysAgo >= days }
-        .sortedByDescending { it.daysAgo }
+        .sortedBy { it.daysAgo }
 
     /** Movements on the list that have never been logged, by area then name. */
     fun neverDone(): List<Exercise> {
