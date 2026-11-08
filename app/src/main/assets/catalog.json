@@ -1,5 +1,5 @@
 {
- "catalogVersion": 8,
+ "catalogVersion": 9,
  "retired": [
   "incline-row"
  ],
@@ -109,7 +109,8 @@
    "name": "Single-arm pushups",
    "areas": [
     "chest",
-    "core"
+    "core",
+    "arms"
    ],
    "equip": "Crosscore",
    "measures": [
@@ -121,7 +122,8 @@
    "id": "cable-chest",
    "name": "Cable chest press (single)",
    "areas": [
-    "chest"
+    "chest",
+    "arms"
    ],
    "equip": "Crosscore",
    "measures": [
@@ -176,7 +178,8 @@
    "id": "cable-pull",
    "name": "Cable pulls (single)",
    "areas": [
-    "back"
+    "back",
+    "arms"
    ],
    "equip": "Crosscore",
    "measures": [
@@ -189,7 +192,8 @@
    "id": "upper-back-pull",
    "name": "Upper back pulls",
    "areas": [
-    "back"
+    "back",
+    "shoulders"
    ],
    "equip": "Crosscore",
    "measures": [
@@ -384,7 +388,8 @@
    "id": "bosu-squat",
    "name": "Bosu squats",
    "areas": [
-    "legs"
+    "legs",
+    "glutes"
    ],
    "equip": "Dumbbells",
    "measures": [
@@ -397,7 +402,8 @@
    "id": "bosu-goblet-squat",
    "name": "Bosu goblet squats",
    "areas": [
-    "legs"
+    "legs",
+    "glutes"
    ],
    "equip": "Dumbbells",
    "measures": [
@@ -410,7 +416,8 @@
    "id": "shiko",
    "name": "Shiko",
    "areas": [
-    "legs"
+    "legs",
+    "glutes"
    ],
    "equip": "Body weight",
    "measures": [
@@ -856,7 +863,8 @@
    "name": "KB overhead swing",
    "areas": [
     "conditioning",
-    "shoulders"
+    "shoulders",
+    "glutes"
    ],
    "equip": "Kettlebell",
    "measures": [
@@ -931,7 +939,8 @@
    "name": "Rowing machine",
    "areas": [
     "conditioning",
-    "back"
+    "back",
+    "legs"
    ],
    "equip": "Rowing machine",
    "measures": [
@@ -945,7 +954,8 @@
    "name": "Heavy bag workout",
    "areas": [
     "conditioning",
-    "shoulders"
+    "shoulders",
+    "core"
    ],
    "equip": "",
    "measures": [
@@ -969,7 +979,9 @@
    "id": "paddle",
    "name": "Paddleboarding",
    "areas": [
-    "conditioning"
+    "conditioning",
+    "core",
+    "shoulders"
    ],
    "equip": "",
    "measures": [
