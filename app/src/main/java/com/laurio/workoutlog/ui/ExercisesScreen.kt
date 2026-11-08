@@ -21,12 +21,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -37,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +64,9 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
     var editing by remember { mutableStateOf<Exercise?>(null) }
     var adding by remember { mutableStateOf(false) }
     var importUri by remember { mutableStateOf<Uri?>(null) }
+    var search by rememberSaveable { mutableStateOf("") }
+    val q = search.trim().lowercase()
+    fun matches(e: Exercise) = q.isEmpty() || e.name.lowercase().contains(q) || e.equip.lowercase().contains(q)
 
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) vm.export(uri)
@@ -82,11 +89,27 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
                 Spacer(Modifier.width(6.dp))
                 Text("Add movement")
             }
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                value = search, onValueChange = { search = it },
+                placeholder = { Text("Search movements or equipment") },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (search.isNotEmpty()) {
+                        IconButton(onClick = { search = "" }) { Icon(Icons.Filled.Close, contentDescription = "Clear search") }
+                    }
+                },
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
         } }
-        items(data.areas, key = { it.id }) { a ->
+        val shownAreas = data.areas.filter { a -> q.isEmpty() || data.exercises.any { !it.hidden && it.mainArea == a.id && matches(it) } }
+        if (shownAreas.isEmpty()) {
+            item { Text("No movements match \"${search.trim()}\".", color = Muted) }
+        }
+        items(shownAreas, key = { it.id }) { a ->
             AreaCard(
                 area = a,
-                movements = data.exercises.filter { !it.hidden && it.mainArea == a.id }.sortedBy { it.name.lowercase() },
+                movements = data.exercises.filter { !it.hidden && it.mainArea == a.id && matches(it) }.sortedBy { it.name.lowercase() },
                 stats = stats,
                 areaNames = areaNames,
                 onEdit = { editing = it },

@@ -41,6 +41,9 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - **Move down** on each Next area card (`MoveDownButton`): rest an area for Today / 2 / 3 days (`Area.restUntil`,
   last rest day; e.g. a strain). Resting areas are left out of `Stats.focus`/`allByRest` (so another area is
   suggested), shown dimmed under "Moved down" with "Bring back" (`RestingCard`), and return on their own after.
+- Next tab's **All areas** list: tapping an area jumps to its card above (and expands it), or opens its card
+  right under the row if it isn't one of the cards (`openArea` in `NextScreen`).
+- Exercises tab has a **search** box (name or equipment); areas with no match are hidden while searching.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 

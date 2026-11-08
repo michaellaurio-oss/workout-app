@@ -21,6 +21,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -56,8 +59,25 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
     val resting = remember(stats) { stats.resting() }
     val routine = remember(stats) { stats.everySession() }
     val expanded = remember { mutableStateListOf<String>() }
+    // An area opened from the All areas list that has no card above (not due).
+    var openedBelow by remember { mutableStateOf<String?>(null) }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val firstCardIndex = 1 + if (routine.isNotEmpty()) 1 else 0
+
+    /** Tapping an area in the All areas list: jump to its card, or open it right there. */
+    fun openArea(id: String) {
+        val i = cards.indexOfFirst { it.area.id == id }
+        if (i >= 0) {
+            if (id !in expanded) expanded.add(id)
+            scope.launch { listState.animateScrollToItem(firstCardIndex + i) }
+        } else {
+            openedBelow = if (openedBelow == id) null else id
+        }
+    }
 
     LazyColumn(
+        state = listState,
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -88,8 +108,17 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
             items(resting, key = { "rest-" + it.area.id }) { st -> RestingCard(st, vm) }
         }
         if (!allFresh) {
-            item { SectionLabel("All areas · credits short and when") }
-            items(stats.areas.sortedByDescending { it.ratio }, key = { "all-" + it.area.id }) { AreaRow(it) }
+            item { SectionLabel("All areas · tap one to see its movements") }
+            items(stats.areas.sortedByDescending { it.ratio }, key = { "all-" + it.area.id }) { st ->
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AreaRow(st, open = openedBelow == st.area.id) { openArea(st.area.id) }
+                    if (openedBelow == st.area.id) {
+                        FocusCard(st, stats, vm, open = st.area.id in expanded) {
+                            if (st.area.id in expanded) expanded.remove(st.area.id) else expanded.add(st.area.id)
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -214,10 +243,16 @@ private fun MovementRow(m: Movement, stats: Stats, checked: Boolean, onToggle: (
 }
 
 @Composable
-private fun AreaRow(st: AreaStatus) {
+private fun AreaRow(st: AreaStatus, open: Boolean, onClick: () -> Unit) {
     val (fg, _) = statusColors(st.status)
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(st.area.label, Modifier.width(132.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            st.area.label, Modifier.width(132.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium,
+            color = if (open) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+        )
         TargetBar(st.ratio, fg, Modifier.weight(1f))
         Spacer(Modifier.width(10.dp))
         val resting = st.area.isResting(LocalDate.now())
