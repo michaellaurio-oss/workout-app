@@ -12,6 +12,9 @@ fun prettyDate(date: String): String {
     return d.format(if (d.year == LocalDate.now().year) dayFmt else dayYearFmt)
 }
 
+/** "Sat, Mar 14" with no year; for lists that show the year in a header. */
+fun shortDate(date: String): String = LocalDate.parse(date).format(dayFmt)
+
 fun ago(days: Int): String = when {
     days <= 0 -> "today"
     days == 1 -> "yesterday"

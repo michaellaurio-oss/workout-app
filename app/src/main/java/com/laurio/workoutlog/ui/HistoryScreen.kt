@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.laurio.workoutlog.data.AppData
 import com.laurio.workoutlog.logic.formatDetail
 import com.laurio.workoutlog.logic.prettyDate
+import com.laurio.workoutlog.logic.shortDate
 
 private sealed interface Pending {
     data class Day(val date: String) : Pending
@@ -47,42 +48,50 @@ fun HistoryScreen(data: AppData, vm: AppViewModel) {
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item { ScreenTitle("History", "${days.size} days logged") }
         if (days.isEmpty()) item { Text("No workouts yet. Log one on the Log tab.", color = Muted) }
-        items(days, key = { it.date }) { s ->
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 4.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            prettyDate(s.date), Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
-                        )
-                        if (s.tag.isNotBlank()) Pill(s.tag, Muted, MaterialTheme.colorScheme.surfaceVariant)
-                        TextButton(onClick = { pending = Pending.Day(s.date) }) { Text("Delete") }
-                    }
-                    s.items.forEachIndexed { i, item ->
-                        val name = names[item.ex] ?: item.ex
+        days.groupBy { it.date.take(4) }.forEach { (year, inYear) ->
+            item(key = "year-$year") {
+                Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.Bottom) {
+                    Text(year, Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("${inYear.size} day${if (inYear.size == 1) "" else "s"}", style = MaterialTheme.typography.bodyMedium, color = Muted)
+                }
+            }
+            items(inYear, key = { it.date }) { s ->
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                    Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 12.dp, bottom = 4.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f).clickable { progressId = item.ex }) {
-                                Text(name, style = MaterialTheme.typography.bodyLarge)
-                                val detail = formatDetail(item.groups, item.note)
-                                if (detail.isNotEmpty()) Text(detail, style = MaterialTheme.typography.bodySmall, color = Muted)
-                            }
-                            IconButton(onClick = { pending = Pending.Line(s.date, i, name) }) {
-                                Icon(Icons.Filled.Close, contentDescription = "Remove $name", tint = Muted)
+                            Text(
+                                shortDate(s.date), Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
+                            )
+                            if (s.tag.isNotBlank()) Pill(s.tag, Muted, MaterialTheme.colorScheme.surfaceVariant)
+                            TextButton(onClick = { pending = Pending.Day(s.date) }) { Text("Delete") }
+                        }
+                        s.items.forEachIndexed { i, item ->
+                            val name = names[item.ex] ?: item.ex
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Column(Modifier.weight(1f).clickable { progressId = item.ex }) {
+                                    Text(name, style = MaterialTheme.typography.bodyLarge)
+                                    val detail = formatDetail(item.groups, item.note)
+                                    if (detail.isNotEmpty()) Text(detail, style = MaterialTheme.typography.bodySmall, color = Muted)
+                                }
+                                IconButton(onClick = { pending = Pending.Line(s.date, i, name) }) {
+                                    Icon(Icons.Filled.Close, contentDescription = "Remove $name", tint = Muted)
+                                }
                             }
                         }
-                    }
-                    if (s.areas.isNotEmpty()) {
-                        Text(
-                            "Areas: " + s.areas.joinToString { areaNames[it] ?: it },
-                            style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 4.dp),
-                        )
-                    }
-                    if (s.note.isNotBlank()) Text(s.note, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 4.dp))
-                    if (s.raw.isNotBlank()) {
-                        Text(
-                            "Original: ${s.raw}", style = MaterialTheme.typography.labelSmall, color = Muted,
-                            modifier = Modifier.padding(bottom = 8.dp, end = 12.dp),
-                        )
+                        if (s.areas.isNotEmpty()) {
+                            Text(
+                                "Areas: " + s.areas.joinToString { areaNames[it] ?: it },
+                                style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 4.dp),
+                            )
+                        }
+                        if (s.note.isNotBlank()) Text(s.note, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 4.dp))
+                        if (s.raw.isNotBlank()) {
+                            Text(
+                                "Original: ${s.raw}", style = MaterialTheme.typography.labelSmall, color = Muted,
+                                modifier = Modifier.padding(bottom = 8.dp, end = 12.dp),
+                            )
+                        }
                     }
                 }
             }
