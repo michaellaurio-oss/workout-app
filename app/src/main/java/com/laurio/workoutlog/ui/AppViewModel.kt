@@ -234,6 +234,19 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(target = days.coerceIn(1, 30)) else it })
     }
 
+    /** Moves an area down for [days] days (1 = today only), e.g. while a strain heals. */
+    fun restArea(areaId: String, days: Int) {
+        val until = LocalDate.now().plusDays((days - 1).coerceAtLeast(0).toLong()).toString()
+        val label = _data.value?.areas?.firstOrNull { it.id == areaId }?.label ?: areaId
+        change("$label moved down " + if (days <= 1) "for today" else "for $days days") { d ->
+            d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(restUntil = until) else it })
+        }
+    }
+
+    fun endRest(areaId: String) = change { d ->
+        d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(restUntil = "") else it })
+    }
+
     fun setCredits(areaId: String, credits: Double) = change { d ->
         val c = (Math.round(credits * 2) / 2.0).coerceIn(Area.MIN_CREDITS, Area.MAX_CREDITS)
         d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(credits = c) else it })

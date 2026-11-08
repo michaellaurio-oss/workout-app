@@ -113,19 +113,25 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
      */
     fun focus(): List<AreaStatus> {
         val rested = { s: AreaStatus -> (s.days ?: 99) >= 2 }
-        val strength = areas.filter { it.area.kind == "strength" }.sortedByDescending { it.ratio }
+        val strength = active().filter { it.area.kind == "strength" }.sortedByDescending { it.ratio }
         val picked = strength.filter { it.ratio >= 1 && rested(it) }.take(3).toMutableList()
         for (s in strength) if (picked.size < 2 && s !in picked && s.ratio >= 0.75 && rested(s)) picked.add(s)
-        val extras = areas.filter { it.area.kind != "strength" && it.ratio >= 1 }.sortedByDescending { it.ratio }
+        val extras = active().filter { it.area.kind != "strength" && it.ratio >= 1 }.sortedByDescending { it.ratio }
         return picked + extras
     }
+
+    /** Areas he isn't resting today. */
+    fun active(): List<AreaStatus> = areas.filter { !it.area.isResting(today) }
+
+    /** Areas he moved down (resting through [Area.restUntil]); shown last on Next. */
+    fun resting(): List<AreaStatus> = areas.filter { it.area.isResting(today) }.sortedBy { it.area.restUntil }
 
     /**
      * When nothing is due, every area is offered, longest since worked first, so the area he
      * did most recently ends up at the bottom.
      */
     fun allByRest(): List<AreaStatus> =
-        areas.sortedWith(compareByDescending<AreaStatus> { it.days ?: Int.MAX_VALUE }.thenByDescending { it.ratio })
+        active().sortedWith(compareByDescending<AreaStatus> { it.days ?: Int.MAX_VALUE }.thenByDescending { it.ratio })
 
     /** His every-session routine (warmup etc.), in list order. Shown on Next whatever is due. */
     fun everySession(): List<Movement> = data.exercises

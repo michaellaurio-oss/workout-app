@@ -12,10 +12,20 @@ import org.json.JSONObject
  * A body area such as Chest or Mobility. [target] = how many days between sessions he wants.
  * [credits] = credits a day needs in this area to count it as done (movements give 1 to their
  * main area and 0.5 to each area they also work).
+ * [restUntil] = last day (yyyy-MM-dd) he's resting this area (e.g. a strain); "" = not resting.
  */
-data class Area(val id: String, val label: String, val target: Int, val kind: String, val credits: Double = DEFAULT_CREDITS) {
+data class Area(
+    val id: String,
+    val label: String,
+    val target: Int,
+    val kind: String,
+    val credits: Double = DEFAULT_CREDITS,
+    val restUntil: String = "",
+) {
+    fun isResting(today: java.time.LocalDate): Boolean = restUntil.isNotBlank() && restUntil >= today.toString()
+
     fun toJson(): JSONObject = JSONObject().put("id", id).put("label", label).put("target", target).put("kind", kind)
-        .put("credits", credits)
+        .put("credits", credits).apply { if (restUntil.isNotBlank()) put("restUntil", restUntil) }
 
     companion object {
         fun fromJson(o: JSONObject) = Area(
@@ -24,6 +34,7 @@ data class Area(val id: String, val label: String, val target: Int, val kind: St
             target = o.optInt("target", 4),
             kind = o.optString("kind", "strength"),
             credits = o.optDouble("credits", DEFAULT_CREDITS).takeIf { !it.isNaN() && it > 0 } ?: DEFAULT_CREDITS,
+            restUntil = o.optString("restUntil", ""),
         )
 
         const val DEFAULT_CREDITS = 2.0

@@ -1,6 +1,15 @@
 package com.laurio.workoutlog.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,6 +53,7 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
     val focus = remember(stats) { stats.focus() }
     val allFresh = focus.isEmpty()
     val cards = remember(stats) { if (allFresh) stats.allByRest() else focus }
+    val resting = remember(stats) { stats.resting() }
     val routine = remember(stats) { stats.everySession() }
     val expanded = remember { mutableStateListOf<String>() }
 
@@ -72,6 +82,10 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
             FocusCard(st, stats, vm, open = st.area.id in expanded) {
                 if (st.area.id in expanded) expanded.remove(st.area.id) else expanded.add(st.area.id)
             }
+        }
+        if (resting.isNotEmpty()) {
+            item { SectionLabel("Moved down") }
+            items(resting, key = { "rest-" + it.area.id }) { st -> RestingCard(st, vm) }
         }
         if (!allFresh) {
             item { SectionLabel("All areas · credits short and when") }
@@ -105,9 +119,47 @@ private fun FocusCard(st: AreaStatus, stats: Stats, vm: AppViewModel, open: Bool
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                 MovementRow(m, stats, checked = vm.isPicked(m.exercise.id)) { vm.togglePick(m.exercise.id) }
             }
-            if (list.size > 4) {
-                TextButton(onClick = onToggleOpen) { Text(if (open) "Show fewer" else "Show all ${list.size}") }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (list.size > 4) {
+                    TextButton(onClick = onToggleOpen) { Text(if (open) "Show fewer" else "Show all ${list.size}") }
+                }
+                Spacer(Modifier.weight(1f))
+                MoveDownButton(st.area.label) { days -> vm.restArea(st.area.id, days) }
             }
+        }
+    }
+}
+
+/** "Move down" with a choice of how long, for an area he can't train right now. */
+@Composable
+private fun MoveDownButton(label: String, onPick: (Int) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        TextButton(onClick = { open = true }) {
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null)
+            Text("Move down")
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            listOf(1 to "Today", 2 to "2 days", 3 to "3 days").forEach { (days, text) ->
+                DropdownMenuItem(text = { Text(text) }, onClick = { open = false; onPick(days) })
+            }
+        }
+    }
+}
+
+/** An area he moved down: dimmed, with when it comes back and a way to bring it back now. */
+@Composable
+private fun RestingCard(st: AreaStatus, vm: AppViewModel) {
+    val until = java.time.LocalDate.parse(st.area.restUntil)
+    val back = if (until == java.time.LocalDate.now()) "Back tomorrow"
+    else "Resting through " + until.format(java.time.format.DateTimeFormatter.ofPattern("EEE"))
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f))) {
+        Row(Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(st.area.label.uppercase(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Muted)
+                Text(back, style = MaterialTheme.typography.bodySmall, color = Muted)
+            }
+            TextButton(onClick = { vm.endRest(st.area.id) }) { Text("Bring back") }
         }
     }
 }
@@ -168,9 +220,10 @@ private fun AreaRow(st: AreaStatus) {
         Text(st.area.label, Modifier.width(132.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
         TargetBar(st.ratio, fg, Modifier.weight(1f))
         Spacer(Modifier.width(10.dp))
+        val resting = st.area.isResting(LocalDate.now())
         Text(
-            goalShort(st), Modifier.width(112.dp),
-            style = MaterialTheme.typography.bodySmall, color = fg, textAlign = TextAlign.End,
+            if (resting) "moved down" else goalShort(st), Modifier.width(112.dp),
+            style = MaterialTheme.typography.bodySmall, color = if (resting) Muted else fg, textAlign = TextAlign.End,
         )
     }
 }

@@ -38,6 +38,9 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - `Exercise.video`: instruction-video link; a ▶ button (`VideoButton` in `ui/Components.kt`) opens it on Next,
   in the Log card and on the Exercises tab. Editable in the movement dialog; kept from his data on upgrade if the
   list has none.
+- **Move down** on each Next area card (`MoveDownButton`): rest an area for Today / 2 / 3 days (`Area.restUntil`,
+  last rest day; e.g. a strain). Resting areas are left out of `Stats.focus`/`allByRest` (so another area is
+  suggested), shown dimmed under "Moved down" with "Bring back" (`RestingCard`), and return on their own after.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 

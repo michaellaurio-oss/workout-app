@@ -53,7 +53,7 @@ object CatalogUpgrade {
         val exercises = listed + extras
 
         val oldAreas = data.areas.associateBy { it.id }
-        val areas = catalog.areas.map { a -> oldAreas[a.id]?.let { a.copy(target = it.target, credits = it.credits) } ?: a } +
+        val areas = catalog.areas.map { a -> oldAreas[a.id]?.let { a.copy(target = it.target, credits = it.credits, restUntil = it.restUntil) } ?: a } +
             data.areas.filter { a -> catalog.areas.none { it.id == a.id } }
 
         val seedByDate = history.associateBy { it.date }
