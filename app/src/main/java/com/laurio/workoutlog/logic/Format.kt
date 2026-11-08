@@ -89,3 +89,51 @@ fun formatGroup(g: SetGroup): String {
 fun formatDetail(groups: List<SetGroup>, note: String): String =
     listOf(groups.filter { !it.isEmpty }.joinToString(", ") { formatGroup(it) }, note.trim())
         .filter { it.isNotEmpty() }.joinToString(" · ")
+
+private fun creditWord(c: Double) = "${formatWeight(c)} credit${if (c == 1.0) "" else "s"}"
+
+/**
+ * What it takes to finish an area, e.g. "Need 1 more credit by Thu (1 of 2 so far)" or
+ * "Need 2 credits · due in 2 days". [today] is the day the screen is showing.
+ */
+fun goalText(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
+    val left = s.daysLeft
+    if (left != null && s.partialCredits > 0) {
+        val by = when (left) {
+            1 -> "today"
+            2 -> "tomorrow"
+            else -> "by " + today.plusDays((left - 1).toLong()).format(DateTimeFormatter.ofPattern("EEE"))
+        }
+        return "Need ${creditWord(s.creditsShort).let { if (s.partialCredits > 0) it.replaceFirst(" credit", " more credit") else it }} $by " +
+            "(${formatWeight(s.partialCredits)} of ${formatWeight(s.area.credits)} so far)"
+    }
+    val due = s.dueIn
+    val whenText = when {
+        due == null -> "never done"
+        due > 1 -> "due in $due days"
+        due == 1 -> "due tomorrow"
+        due == 0 -> "due today"
+        else -> "overdue ${-due} day${if (due == -1) "" else "s"}"
+    }
+    return "Need ${creditWord(s.area.credits)} · $whenText"
+}
+
+/** Short form for the All areas list: "1 short · by Thu", "2 short · in 2 days", "2 short · 5 late". */
+fun goalShort(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
+    val left = s.daysLeft
+    if (left != null && s.partialCredits > 0) {
+        val by = when (left) {
+            1 -> "today"
+            2 -> "tomorrow"
+            else -> "by " + today.plusDays((left - 1).toLong()).format(DateTimeFormatter.ofPattern("EEE"))
+        }
+        return "${formatWeight(s.creditsShort)} short · $by"
+    }
+    val due = s.dueIn
+    return "${formatWeight(s.area.credits)} short · " + when {
+        due == null -> "never"
+        due > 0 -> "in $due d"
+        due == 0 -> "today"
+        else -> "${-due} d late"
+    }
+}

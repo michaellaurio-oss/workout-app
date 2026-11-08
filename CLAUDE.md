@@ -11,11 +11,14 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - Areas (Chest, Back, Shoulders, Arms, Legs, Glutes & Hamstrings, Core, Conditioning, Mobility) each have a
   target "every N days" (`Area.target`) and **credits needed** (`Area.credits`, default 2, 0.5 steps, 0.5–10),
   both set on the **Areas tab** (`ui/AreasScreen.kt`). Catalog upgrades keep his values.
-- A movement's `areas` list = main area first, then areas it also works. **Credits** (his rule, 2026-11-07):
-  each movement logged on a day gives 1 credit to its main area and 0.5 to each area it also works; a day
-  reaching the area's credits needed resets that area's clock (`MAIN_CREDIT`, `ALSO_CREDIT`,
-  `Stats.creditsFor` in `logic/Recommend.kt`). An area-only log ("upper") counts as a full reset. Days below
-  it don't reset; Next shows the latest such day as "1 of 2".
+- A movement's `areas` list = main area first, then areas it also works. **Credits** (his rules, 2026-11-07):
+  each movement logged on a day gives 1 credit to its main area and 0.5 to each area it also works (same
+  movement twice in a day counts once; `MAIN_CREDIT`, `ALSO_CREDIT`, `Stats.creditsFor`). Credits **add up
+  across days within the area's every-N-days period**; the day they reach the area's credits needed resets
+  its clock, and counting restarts from zero (credits never count toward two resets). An area-only log
+  ("upper") is a full reset. `AreaStatus.creditsShort` / `daysLeft` / `dueIn` feed the Next tab's
+  "Need 1 more credit by Thu (1 of 2 so far)" / "Need 2 credits · due in 2 days" (`goalText`, `goalShort`
+  in `logic/Format.kt`).
 - Recommendation (`Stats.focus`): up to 3 strength areas at/over target and not worked in the last day,
   topped up to 2 with ones at >= 75% of target, plus Conditioning/Mobility when due.
   When nothing is due, the Next tab shows every area instead (`Stats.allByRest`), longest since worked

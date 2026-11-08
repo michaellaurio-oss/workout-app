@@ -33,6 +33,8 @@ import com.laurio.workoutlog.logic.Movement
 import com.laurio.workoutlog.logic.Stats
 import com.laurio.workoutlog.logic.ago
 import com.laurio.workoutlog.logic.formatDetail
+import com.laurio.workoutlog.logic.goalShort
+import com.laurio.workoutlog.logic.goalText
 import com.laurio.workoutlog.logic.prettyDate
 import java.time.LocalDate
 
@@ -72,7 +74,7 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
             }
         }
         if (!allFresh) {
-            item { SectionLabel("All areas · the tick is your target") }
+            item { SectionLabel("All areas · credits short and when") }
             items(stats.areas.sortedByDescending { it.ratio }, key = { "all-" + it.area.id }) { AreaRow(it) }
         }
     }
@@ -90,6 +92,10 @@ private fun FocusCard(st: AreaStatus, stats: Stats, vm: AppViewModel, open: Bool
                 )
                 StatusPill(st.status)
             }
+            Text(
+                goalText(st), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold,
+                color = statusColors(st.status).first,
+            )
             Text(whyText(st), style = MaterialTheme.typography.bodySmall, color = Muted)
             Spacer(Modifier.height(6.dp))
             if (list.isEmpty()) {
@@ -159,12 +165,12 @@ private fun MovementRow(m: Movement, stats: Stats, checked: Boolean, onToggle: (
 private fun AreaRow(st: AreaStatus) {
     val (fg, _) = statusColors(st.status)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(st.area.label, Modifier.width(150.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+        Text(st.area.label, Modifier.width(132.dp), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
         TargetBar(st.ratio, fg, Modifier.weight(1f))
         Spacer(Modifier.width(10.dp))
         Text(
-            st.days?.let { ago(it) } ?: "none yet", Modifier.width(92.dp),
-            style = MaterialTheme.typography.bodySmall, color = Muted, textAlign = TextAlign.End,
+            goalShort(st), Modifier.width(112.dp),
+            style = MaterialTheme.typography.bodySmall, color = fg, textAlign = TextAlign.End,
         )
     }
 }
@@ -173,12 +179,6 @@ private fun whyText(s: AreaStatus): String {
     val parts = mutableListOf(
         if (s.days == null) "no full session yet" else "full session ${ago(s.days)}",
     )
-    if (s.partialDays != null) {
-        parts += "${credits(s.partialCredits)} of ${credits(s.area.credits)} ${ago(s.partialDays)}"
-    }
     parts += "target every ${s.area.target} days"
     return parts.joinToString(" · ")
 }
-
-/** 1.0 -> "1", 1.5 -> "1.5" */
-private fun credits(c: Double): String = if (c % 1.0 == 0.0) c.toLong().toString() else c.toString()

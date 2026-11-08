@@ -12,10 +12,12 @@ enum class Status(val label: String) { FRESH("Fresh"), SOON("Soon"), DUE("Due"),
 data class LastDone(val date: String, val groups: List<SetGroup>, val note: String)
 
 /**
- * How due an area is. A day "resets" an area once its credits reach the area's [Area.credits]: each movement
- * counts 1 for its main area and 0.5 for each area it also works; an area-only log ("upper") counts
- * as a full reset. [days] = days since the last reset (null = never). [partialDays]/[partialCredits]
- * describe a more recent day that didn't reach a reset, if there is one.
+ * How due an area is. Each movement counts 1 credit for its main area and 0.5 for each area it also
+ * works; an area-only log ("upper") counts as a full reset. Credits add up across days within the
+ * area's every-N-days period ([Area.target]); the day they reach [Area.credits] resets the area, and
+ * counting starts over from zero after it (so the same credits never count twice).
+ * [days] = days since the last reset (null = never). [partialCredits] = credits collected since then
+ * that are still inside the period as of today; [partialDays] = days since the oldest of those.
  */
 data class AreaStatus(
     val area: Area,
@@ -24,7 +26,16 @@ data class AreaStatus(
     val partialCredits: Double,
     val ratio: Double,
     val status: Status,
-)
+) {
+    /** Credits still missing for the next reset. */
+    val creditsShort: Double get() = (area.credits - partialCredits).coerceAtLeast(0.0)
+
+    /** Days left (today included) to add the missing credits before the oldest open credit drops out. */
+    val daysLeft: Int? get() = partialDays?.let { area.target.coerceAtLeast(1) - it }
+
+    /** Days until the area is due (0 = today, negative = overdue); null = never done. */
+    val dueIn: Int? get() = days?.let { area.target.coerceAtLeast(1) - it }
+}
 
 data class Movement(val exercise: Exercise, val last: LastDone?)
 
@@ -41,27 +52,35 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
     private val needed: Map<String, Double> = data.areas.associate { it.id to it.credits }
 
     init {
-        val lastReset = HashMap<String, String>()
-        val lastPartial = HashMap<String, Pair<String, Double>>()
-        for (s in data.sessions) {
+        // Credits per area per day (epoch day), oldest day first.
+        val byArea = HashMap<String, MutableList<Pair<Long, Double>>>()
+        for (s in data.sessions.sortedBy { it.date }) {
             for (item in s.items) {
                 countEx[item.ex] = (countEx[item.ex] ?: 0) + 1
                 val prev = lastEx[item.ex]
                 if (prev == null || prev.date < s.date) lastEx[item.ex] = LastDone(s.date, item.groups, item.note)
             }
-            for ((a, credit) in creditsFor(s)) {
-                if (credit >= (needed[a] ?: Area.DEFAULT_CREDITS) - 1e-9) {
-                    if ((lastReset[a] ?: "") < s.date) lastReset[a] = s.date
-                } else if ((lastPartial[a]?.first ?: "") < s.date) {
-                    lastPartial[a] = s.date to credit
-                }
-            }
+            val day = LocalDate.parse(s.date).toEpochDay()
+            for ((a, credit) in creditsFor(s)) if (credit > 0) byArea.getOrPut(a) { mutableListOf() }.add(day to credit)
         }
+        val todayDay = today.toEpochDay()
         areas = data.areas.map { a ->
             val target = a.target.coerceAtLeast(1)
-            val reset = lastReset[a.id]
-            val days = reset?.let { daysAgo(it) }
-            val partial = lastPartial[a.id]?.takeIf { reset == null || it.first > reset }
+            val need = a.credits - 1e-9
+            var reset: Long? = null
+            val open = ArrayDeque<Pair<Long, Double>>()
+            for ((day, credit) in byArea[a.id].orEmpty()) {
+                while (open.isNotEmpty() && open.first().first <= day - target) open.removeFirst()
+                open.addLast(day to credit)
+                if (open.sumOf { it.second } >= need) {
+                    reset = day
+                    open.clear()
+                }
+            }
+            while (open.isNotEmpty() && open.first().first <= todayDay - target) open.removeFirst()
+            val days = reset?.let { (todayDay - it).toInt() }
+            val partialCredits = open.sumOf { it.second }
+            val partialDays = open.firstOrNull()?.let { (todayDay - it.first).toInt() }
             val ratio = if (days == null) 9.0 else days.toDouble() / target
             val status = when {
                 days == null || ratio >= 2 -> Status.OVERDUE
@@ -69,7 +88,7 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
                 ratio >= 0.75 -> Status.SOON
                 else -> Status.FRESH
             }
-            AreaStatus(a, days, partial?.let { daysAgo(it.first) }, partial?.second ?: 0.0, ratio, status)
+            AreaStatus(a, days, partialDays, partialCredits, ratio, status)
         }
     }
 
