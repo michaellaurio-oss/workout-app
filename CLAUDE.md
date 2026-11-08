@@ -44,18 +44,26 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 
+- **Insights tab** (`ui/InsightsScreen.kt`): this week / avg per week (last 8 full weeks) / streak (weeks in a
+  row with 3+ workouts; injury weeks skipped), 17-week heatmap, then for a 4 wk / 8 wk / All window: each area's
+  % of days not past its every-N-days target (same credit rules as Next; injury days left out), most-done
+  movements, and movements not done in 30+ days (plus never-done). Tapping a movement there or in History opens
+  `ProgressDialog`: heaviest weight per day (else most reps, else longest time) with the best marked, plus every day logged.
+
 ## Architecture
 
 Single-activity Jetpack Compose app, no DI, no database library (same pattern as Slam Log).
 
-- `MainActivity.kt`: bottom tabs (Next, Log, History, Exercises, Areas), snackbar, back goes to Next.
+- `MainActivity.kt`: bottom tabs (Next, Log, History, Insights, Exercises, Areas), snackbar, back goes to Next.
 - `ui/AppViewModel.kt`: holds `AppData`, the workout being logged (`picked`, `logDate`, `logNote`),
   all edits, backup export/import.
 - `data/Models.kt`: `Area`, `Exercise`, `SetGroup`, `Item`, `Session`, `AppData` with org.json (de)serialization.
   New fields need defaults and fallbacks so older files and backups keep loading.
 - `data/Store.kt`: `workouts.json` in app storage; first launch starts from `assets/catalog.json` + `assets/history.json`.
 - `data/CatalogUpgrade.kt`: applies a newer built-in exercise list to existing data, once per catalogVersion.
-- `logic/Recommend.kt` (`Stats`), `logic/Format.kt` (dates, "4×12 @ 40 lb").
+- `logic/Recommend.kt` (`Stats`; `resetDays` = every day an area counted as worked), `logic/Insights.kt`
+  (Insights tab: weekly consistency + streak, heatmap, area on-schedule %, most done, not done in 30+ days,
+  `progressFor` = per-movement chart data), `logic/Format.kt` (dates, "4×12 @ 40 lb").
 - `ui/`: one file per tab plus `Components.kt`, `Theme.kt`.
 
 ## Starter data

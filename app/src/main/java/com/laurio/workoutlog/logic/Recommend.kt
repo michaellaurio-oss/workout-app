@@ -51,9 +51,10 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
 
     private val needed: Map<String, Double> = data.areas.associate { it.id to it.credits }
 
+    /** Credits per area per day (epoch day), oldest day first. */
+    private val byArea = HashMap<String, MutableList<Pair<Long, Double>>>()
+
     init {
-        // Credits per area per day (epoch day), oldest day first.
-        val byArea = HashMap<String, MutableList<Pair<Long, Double>>>()
         for (s in data.sessions.sortedBy { it.date }) {
             for (item in s.items) {
                 countEx[item.ex] = (countEx[item.ex] ?: 0) + 1
@@ -66,17 +67,8 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
         val todayDay = today.toEpochDay()
         areas = data.areas.map { a ->
             val target = a.target.coerceAtLeast(1)
-            val need = a.credits - 1e-9
-            var reset: Long? = null
-            val open = ArrayDeque<Pair<Long, Double>>()
-            for ((day, credit) in byArea[a.id].orEmpty()) {
-                while (open.isNotEmpty() && open.first().first <= day - target) open.removeFirst()
-                open.addLast(day to credit)
-                if (open.sumOf { it.second } >= need) {
-                    reset = day
-                    open.clear()
-                }
-            }
+            val (resets, open) = walk(a)
+            val reset: Long? = resets.lastOrNull()
             while (open.isNotEmpty() && open.first().first <= todayDay - target) open.removeFirst()
             val days = reset?.let { (todayDay - it).toInt() }
             val partialCredits = open.sumOf { it.second }
@@ -91,6 +83,29 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
             AreaStatus(a, days, partialDays, partialCredits, ratio, status)
         }
     }
+
+    /**
+     * Walks an area's credits oldest day first. Returns every day its credits reached the credits
+     * needed (its clock reset), oldest first, and the credits still open after the last day.
+     */
+    private fun walk(a: Area): Pair<List<Long>, ArrayDeque<Pair<Long, Double>>> {
+        val target = a.target.coerceAtLeast(1)
+        val need = a.credits - 1e-9
+        val resets = mutableListOf<Long>()
+        val open = ArrayDeque<Pair<Long, Double>>()
+        for ((day, credit) in byArea[a.id].orEmpty()) {
+            while (open.isNotEmpty() && open.first().first <= day - target) open.removeFirst()
+            open.addLast(day to credit)
+            if (open.sumOf { it.second } >= need) {
+                resets.add(day)
+                open.clear()
+            }
+        }
+        return resets to open
+    }
+
+    /** Every day [a] counted as worked (its clock reset), as epoch days, oldest first. Used by Insights. */
+    fun resetDays(a: Area): List<Long> = walk(a).first
 
     /** Credits per area for one day. The same movement logged twice that day counts once. */
     fun creditsFor(s: com.laurio.workoutlog.data.Session): Map<String, Double> {

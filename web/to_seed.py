@@ -7,7 +7,7 @@ Bump CATALOG_VERSION whenever the exercise list changes, so phones that already 
 """
 import json, os, re, sys
 
-CATALOG_VERSION = 9
+CATALOG_VERSION = 10
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 AREAS = [  # id, label, target days, kind  (targets: Area Targets tab)
@@ -23,7 +23,8 @@ MEASURES = ["sets", "reps", "weight", "time", "band", "resistance", "speed", "in
 # Names in the LIST tab that differ from the ids already used in his history.
 ALIAS = {"cable chest press (single)": "cable-chest", "cable pulls (single)": "cable-pull",
          "tricep extensions (single)": "tricep-ext", "kb get up": "kb-getup", "kb two-hand swing": "kb-swing",
-         "heavy bag workout": "heavy-bag", "crosscore split squats": "xc-split-squat"}
+         "heavy bag workout": "heavy-bag", "crosscore split squats": "xc-split-squat",
+         "figure 4 glute stretch": "glute-stretch"}
 # Dropped from the LIST tab but used in history: kept hidden so old workouts keep their names.
 HIDDEN = [("xc-shoulders", "Crosscore shoulders", ["shoulders"], "Crosscore", ["sets", "reps", "weight"]),
           ("step-over", "Step-overs", ["legs", "mobility"], "", ["sets", "reps"]),

@@ -40,6 +40,8 @@ import com.laurio.workoutlog.ui.AppViewModel
 import com.laurio.workoutlog.ui.AreasScreen
 import com.laurio.workoutlog.ui.ExercisesScreen
 import com.laurio.workoutlog.ui.HistoryScreen
+import com.laurio.workoutlog.ui.InsightsIcon
+import com.laurio.workoutlog.ui.InsightsScreen
 import com.laurio.workoutlog.ui.LogScreen
 import com.laurio.workoutlog.ui.Muted
 import com.laurio.workoutlog.ui.NextScreen
@@ -59,6 +61,7 @@ private enum class Tab(val label: String, val icon: ImageVector) {
     NEXT("Next", Icons.Filled.Home),
     LOG("Log", Icons.Filled.Add),
     HISTORY("History", Icons.Filled.DateRange),
+    INSIGHTS("Insights", InsightsIcon),
     EXERCISES("Exercises", Icons.Filled.Edit),
     AREAS("Areas", Icons.Filled.Settings),
 }
@@ -89,7 +92,7 @@ private fun AppRoot(vm: AppViewModel) {
                         selected = tab == t,
                         onClick = { tab = t },
                         icon = { Icon(t.icon, contentDescription = null) },
-                        label = { Text(t.label) },
+                        label = { Text(t.label, maxLines = 1, softWrap = false) },
                     )
                 }
             }
@@ -114,6 +117,7 @@ private fun AppRoot(vm: AppViewModel) {
                     Tab.NEXT -> NextScreen(d, vm)
                     Tab.LOG -> LogScreen(d, vm, onSaved = { tab = Tab.NEXT })
                     Tab.HISTORY -> HistoryScreen(d, vm)
+                    Tab.INSIGHTS -> InsightsScreen(d)
                     Tab.EXERCISES -> ExercisesScreen(d, vm)
                     Tab.AREAS -> AreasScreen(d, vm)
                 }

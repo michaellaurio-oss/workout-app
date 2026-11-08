@@ -1,5 +1,5 @@
 {
- "catalogVersion": 9,
+ "catalogVersion": 10,
  "retired": [
   "incline-row"
  ],
@@ -623,6 +623,18 @@
    ]
   },
   {
+   "id": "assisted-pistol-squat",
+   "name": "Assisted pistol squat",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Crosscore",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
    "id": "rdl",
    "name": "RDLs",
    "areas": [
@@ -713,6 +725,20 @@
    "measures": [
     "sets",
     "time"
+   ]
+  },
+  {
+   "id": "drinking-bird",
+   "name": "Drinking bird",
+   "areas": [
+    "glutes",
+    "core"
+   ],
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
    ]
   },
   {
@@ -828,6 +854,30 @@
    "measures": [
     "sets",
     "time"
+   ]
+  },
+  {
+   "id": "bird-dog",
+   "name": "Bird dog",
+   "areas": [
+    "core"
+   ],
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "dying-bug",
+   "name": "Dying bug",
+   "areas": [
+    "core"
+   ],
+   "equip": "",
+   "measures": [
+    "sets",
+    "reps"
    ]
   },
   {
@@ -1098,7 +1148,7 @@
   },
   {
    "id": "glute-stretch",
-   "name": "Glute stretch",
+   "name": "Figure 4 glute stretch",
    "areas": [
     "mobility"
    ],

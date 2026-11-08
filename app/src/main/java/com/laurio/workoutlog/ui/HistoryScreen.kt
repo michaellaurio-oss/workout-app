@@ -1,5 +1,6 @@
 package com.laurio.workoutlog.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,6 +41,7 @@ fun HistoryScreen(data: AppData, vm: AppViewModel) {
     val names = remember(data) { data.exercises.associate { it.id to it.name } }
     val areaNames = remember(data) { data.areas.associate { it.id to it.label } }
     var pending by remember { mutableStateOf<Pending?>(null) }
+    var progressId by remember { mutableStateOf<String?>(null) }
     val days = data.sessions.filter { it.items.isNotEmpty() || it.areas.isNotEmpty() || it.tag.isNotBlank() || it.note.isNotBlank() }
 
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -59,7 +61,7 @@ fun HistoryScreen(data: AppData, vm: AppViewModel) {
                     s.items.forEachIndexed { i, item ->
                         val name = names[item.ex] ?: item.ex
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
+                            Column(Modifier.weight(1f).clickable { progressId = item.ex }) {
                                 Text(name, style = MaterialTheme.typography.bodyLarge)
                                 val detail = formatDetail(item.groups, item.note)
                                 if (detail.isNotEmpty()) Text(detail, style = MaterialTheme.typography.bodySmall, color = Muted)
@@ -86,6 +88,8 @@ fun HistoryScreen(data: AppData, vm: AppViewModel) {
             }
         }
     }
+
+    progressId?.let { id -> ProgressDialog(data, id) { progressId = null } }
 
     when (val p = pending) {
         is Pending.Day -> AlertDialog(
