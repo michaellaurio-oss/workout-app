@@ -1,5 +1,5 @@
 {
- "catalogVersion": 7,
+ "catalogVersion": 8,
  "retired": [
   "incline-row"
  ],
@@ -914,7 +914,9 @@
    "name": "Slam balls",
    "areas": [
     "conditioning",
-    "core"
+    "core",
+    "legs",
+    "glutes"
    ],
    "equip": "Slamball",
    "measures": [
@@ -1101,6 +1103,18 @@
     "mobility"
    ],
    "equip": "",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "twist",
+   "name": "Twist",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
    "measures": [
     "sets",
     "time"
