@@ -234,6 +234,17 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(target = days.coerceIn(1, 30)) else it })
     }
 
+    /** Takes today off: nothing on the schedule counts today. The button then hides for three days. */
+    fun restToday() {
+        val today = LocalDate.now().toString()
+        change("Rest day. Everything moves out a day") { d -> d.copy(restDays = (d.restDays + today).distinct().sorted()) }
+    }
+
+    fun undoRestToday() {
+        val today = LocalDate.now().toString()
+        change("Rest day undone") { d -> d.copy(restDays = d.restDays - today) }
+    }
+
     /** Moves an area down for [days] days (1 = today only), e.g. while a strain heals. */
     fun restArea(areaId: String, days: Int) {
         val until = LocalDate.now().plusDays((days - 1).coerceAtLeast(0).toLong()).toString()

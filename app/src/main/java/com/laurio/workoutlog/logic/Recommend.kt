@@ -26,6 +26,8 @@ data class AreaStatus(
     val partialCredits: Double,
     val ratio: Double,
     val status: Status,
+    /** Today is a rest day: it doesn't count, so deadlines move out a day. */
+    val restToday: Boolean = false,
 ) {
     /** Credits still missing for the next reset. */
     val creditsShort: Double get() = (area.credits - partialCredits).coerceAtLeast(0.0)
@@ -51,6 +53,20 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
 
     private val needed: Map<String, Double> = data.areas.associate { it.id to it.credits }
 
+    /** Rest days (epoch days), sorted. They don't count on the schedule: every area's clock pauses. */
+    private val restEpochs: List<Long> = data.restDays.mapNotNull { runCatching { LocalDate.parse(it).toEpochDay() }.getOrNull() }.sorted()
+
+    fun isRestDay(epochDay: Long): Boolean = restEpochs.binarySearch(epochDay) >= 0
+
+    /** Day number on the schedule: the calendar day minus rest days up to and including it. */
+    fun scheduleDay(epochDay: Long): Long {
+        val i = restEpochs.binarySearch(epochDay)
+        val upTo = if (i >= 0) i + 1 else -i - 1
+        return epochDay - upTo
+    }
+
+    val restToday: Boolean get() = isRestDay(today.toEpochDay())
+
     /** Credits per area per day (epoch day), oldest day first. */
     private val byArea = HashMap<String, MutableList<Pair<Long, Double>>>()
 
@@ -62,17 +78,22 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
                 if (prev == null || prev.date < s.date) lastEx[item.ex] = LastDone(s.date, item.groups, item.note)
             }
             val day = LocalDate.parse(s.date).toEpochDay()
+            // Workouts logged on a rest day are kept in History but give no credits.
+            if (isRestDay(day)) continue
             for ((a, credit) in creditsFor(s)) if (credit > 0) byArea.getOrPut(a) { mutableListOf() }.add(day to credit)
         }
-        val todayDay = today.toEpochDay()
+        val todayS = scheduleDay(today.toEpochDay())
+        val isRest = isRestDay(today.toEpochDay())
         areas = data.areas.map { a ->
             val target = a.target.coerceAtLeast(1)
             val (resets, open) = walk(a)
             val reset: Long? = resets.lastOrNull()
-            while (open.isNotEmpty() && open.first().first <= todayDay - target) open.removeFirst()
-            val days = reset?.let { (todayDay - it).toInt() }
+            // On a rest day, credits whose last chance was the day before can't be completed any more.
+            val cutoff = todayS - target + if (isRest) 1 else 0
+            while (open.isNotEmpty() && scheduleDay(open.first().first) <= cutoff) open.removeFirst()
+            val days = reset?.let { (todayS - scheduleDay(it)).toInt() }
             val partialCredits = open.sumOf { it.second }
-            val partialDays = open.firstOrNull()?.let { (todayDay - it.first).toInt() }
+            val partialDays = open.firstOrNull()?.let { (todayS - scheduleDay(it.first)).toInt() }
             val ratio = if (days == null) 9.0 else days.toDouble() / target
             val status = when {
                 days == null || ratio >= 2 -> Status.OVERDUE
@@ -80,7 +101,7 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
                 ratio >= 0.75 -> Status.SOON
                 else -> Status.FRESH
             }
-            AreaStatus(a, days, partialDays, partialCredits, ratio, status)
+            AreaStatus(a, days, partialDays, partialCredits, ratio, status, isRest)
         }
     }
 
@@ -94,7 +115,8 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
         val resets = mutableListOf<Long>()
         val open = ArrayDeque<Pair<Long, Double>>()
         for ((day, credit) in byArea[a.id].orEmpty()) {
-            while (open.isNotEmpty() && open.first().first <= day - target) open.removeFirst()
+            val dayS = scheduleDay(day)
+            while (open.isNotEmpty() && scheduleDay(open.first().first) <= dayS - target) open.removeFirst()
             open.addLast(day to credit)
             if (open.sumOf { it.second } >= need) {
                 resets.add(day)

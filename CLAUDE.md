@@ -44,6 +44,11 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - Next tab's **All areas** list: tapping an area jumps to its card above (and expands it), or opens its card
   right under the row if it isn't one of the cards (`openArea` in `NextScreen`).
 - Exercises tab has a **search** box (name or equipment); areas with no match are hidden while searching.
+- **Rest day** button at the top of Next (`RestDayBar`): adds today to `AppData.restDays`. Rest days don't count
+  on the schedule: `Stats.scheduleDay` (calendar day minus rest days up to it) drives days-since, the credit
+  window and deadlines, so every clock pauses a day without losing a day. Anything logged on a rest day stays in
+  History but gives no credits (and isn't a workout in Insights). After use the button hides for 3 days (the rest
+  day + 2); on the rest day it shows "Rest day today" with Undo.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 

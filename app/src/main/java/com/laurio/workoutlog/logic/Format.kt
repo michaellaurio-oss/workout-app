@@ -93,6 +93,19 @@ fun formatDetail(groups: List<SetGroup>, note: String): String =
     listOf(groups.filter { !it.isEmpty }.joinToString(", ") { formatGroup(it) }, note.trim())
         .filter { it.isNotEmpty() }.joinToString(" · ")
 
+/**
+ * Last day to finish with [left] schedule days left. Schedule days already skip rest days (a rest
+ * day shares the day before's number), so the calendar offset is the same either way.
+ */
+private fun deadline(left: Int, @Suppress("UNUSED_PARAMETER") restToday: Boolean, today: LocalDate): String {
+    val offset = left - 1
+    return when (offset) {
+        0 -> "today"
+        1 -> "tomorrow"
+        else -> "by " + today.plusDays(offset.toLong()).format(DateTimeFormatter.ofPattern("EEE"))
+    }
+}
+
 private fun creditWord(c: Double) = "${formatWeight(c)} credit${if (c == 1.0) "" else "s"}"
 
 /**
@@ -102,11 +115,7 @@ private fun creditWord(c: Double) = "${formatWeight(c)} credit${if (c == 1.0) ""
 fun goalText(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
     val left = s.daysLeft
     if (left != null && s.partialCredits > 0) {
-        val by = when (left) {
-            1 -> "today"
-            2 -> "tomorrow"
-            else -> "by " + today.plusDays((left - 1).toLong()).format(DateTimeFormatter.ofPattern("EEE"))
-        }
+        val by = deadline(left, s.restToday, today)
         return "Need ${creditWord(s.creditsShort).let { if (s.partialCredits > 0) it.replaceFirst(" credit", " more credit") else it }} $by " +
             "(${formatWeight(s.partialCredits)} of ${formatWeight(s.area.credits)} so far)"
     }
@@ -125,11 +134,7 @@ fun goalText(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
 fun goalShort(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
     val left = s.daysLeft
     if (left != null && s.partialCredits > 0) {
-        val by = when (left) {
-            1 -> "today"
-            2 -> "tomorrow"
-            else -> "by " + today.plusDays((left - 1).toLong()).format(DateTimeFormatter.ofPattern("EEE"))
-        }
+        val by = deadline(left, s.restToday, today)
         return "${formatWeight(s.creditsShort)} short · $by"
     }
     val due = s.dueIn

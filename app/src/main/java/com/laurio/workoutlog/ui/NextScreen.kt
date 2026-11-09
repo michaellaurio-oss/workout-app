@@ -30,6 +30,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -94,6 +95,7 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
                     "Movements are listed oldest first, so the ones you haven't done in a while are on top. Tick what you do, then tap Log.",
                 style = MaterialTheme.typography.bodySmall, color = Muted,
             )
+            RestDayBar(data, vm)
         } }
         if (routine.isNotEmpty()) {
             item(key = "every-session") { RoutineCard(routine, stats, vm) }
@@ -269,4 +271,37 @@ private fun whyText(s: AreaStatus): String {
     )
     parts += "target every ${s.area.target} days"
     return parts.joinToString(" · ")
+}
+
+/**
+ * Rest day: today doesn't count on the schedule (every area's clock pauses, credits don't run out a
+ * day sooner, and anything logged today gives no credits). After it's used, the button hides for
+ * three days: the rest day and the next two.
+ */
+@Composable
+private fun RestDayBar(data: AppData, vm: AppViewModel) {
+    val today = LocalDate.now()
+    val restToday = today.toString() in data.restDays
+    val recent = (1L..2L).any { today.minusDays(it).toString() in data.restDays }
+    if (restToday) {
+        Card(
+            modifier = Modifier.padding(top = 10.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        ) {
+            Row(Modifier.padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Rest day today", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Today doesn't count, so everything moves out a day. Anything you log is saved but gives no credits.",
+                        style = MaterialTheme.typography.bodySmall, color = Muted,
+                    )
+                }
+                TextButton(onClick = { vm.undoRestToday() }) { Text("Undo") }
+            }
+        }
+    } else if (!recent) {
+        OutlinedButton(onClick = { vm.restToday() }, modifier = Modifier.padding(top = 10.dp)) {
+            Text("Rest day")
+        }
+    }
 }

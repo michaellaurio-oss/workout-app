@@ -38,9 +38,12 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
     /** First day anything was logged, or null for an empty log. */
     val firstDay: LocalDate? = data.sessions.minOfOrNull { it.date }?.let { LocalDate.parse(it) }
 
-    /** A day with movements or areas logged, or one tagged "workout" (old log days with no details). */
+    /**
+     * A day with movements or areas logged, or one tagged "workout" (old log days with no details).
+     * Rest days (Rest day button) never count, even if something was logged.
+     */
     private fun isWorkout(s: Session?) =
-        s != null && (s.items.isNotEmpty() || s.areas.isNotEmpty() || s.tag.equals("workout", ignoreCase = true))
+        s != null && !stats.isRestDay(LocalDate.parse(s.date).toEpochDay()) && (s.items.isNotEmpty() || s.areas.isNotEmpty() || s.tag.equals("workout", ignoreCase = true))
     private fun isInjury(s: Session?) = s != null && !isWorkout(s) && s.tag.equals("injury", ignoreCase = true)
 
     fun cell(date: LocalDate): DayCell {
@@ -125,9 +128,9 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
             var onTime = 0
             for (d in start..todayDay) {
                 while (i < resets.size && resets[i] <= d) last = resets[i++]
-                if (d in injury) continue
+                if (d in injury || stats.isRestDay(d)) continue
                 counted++
-                val since = d - (last ?: first)
+                val since = stats.scheduleDay(d) - stats.scheduleDay(last ?: first)
                 if (since <= target) onTime++
             }
             val pct = if (counted == 0) 0 else Math.round(onTime * 100.0 / counted).toInt()
