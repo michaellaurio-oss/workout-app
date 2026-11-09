@@ -16,17 +16,25 @@ class Store(private val context: Context) {
     @Synchronized
     fun load(): AppData {
         if (file.exists()) {
-            try {
-                val data = AppData.fromJson(JSONObject(file.readText()))
-                val upgraded = upgrade(data)
+            val data = try {
+                AppData.fromJson(JSONObject(file.readText()))
+            } catch (e: Exception) {
+                // Only a file that can't be read at all is set aside; keep it instead of losing it.
+                runCatching { file.copyTo(File(file.parentFile, "workouts-unreadable-${System.currentTimeMillis()}.json")) }
+                null
+            }
+            if (data != null) {
+                // A problem applying a newer exercise list must never cost him his log: keep the data as it is.
+                val upgraded = try {
+                    upgrade(data)
+                } catch (e: Exception) {
+                    data
+                }
                 if (upgraded !== data) {
                     runCatching { file.copyTo(File(file.parentFile, "workouts-before-catalog-${upgraded.catalogVersion}.json"), overwrite = true) }
                     save(upgraded)
                 }
                 return upgraded
-            } catch (e: Exception) {
-                // Keep the unreadable file instead of silently losing it.
-                runCatching { file.copyTo(File(file.parentFile, "workouts-unreadable-${System.currentTimeMillis()}.json")) }
             }
         }
         val seed = AppData.fromJson(starterJson())
@@ -73,7 +81,10 @@ class Store(private val context: Context) {
 
     /** Writes a backup to a file the user picked (Downloads, Drive, ...). */
     fun export(uri: Uri, data: AppData) {
-        val out = context.contentResolver.openOutputStream(uri, "wt") ?: error("Couldn't open that file")
+        // "wt" (write + truncate) is the safe mode, but some storage apps only accept plain "w".
+        val out = runCatching { context.contentResolver.openOutputStream(uri, "wt") }.getOrNull()
+            ?: context.contentResolver.openOutputStream(uri, "w")
+            ?: error("Couldn't open that file")
         out.use { it.write(data.toJson().toString(1).toByteArray()) }
     }
 

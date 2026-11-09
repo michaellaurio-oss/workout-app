@@ -53,7 +53,8 @@ import java.time.LocalDate
 
 @Composable
 fun NextScreen(data: AppData, vm: AppViewModel) {
-    val stats = remember(data) { Stats(data) }
+    val today = vm.today
+    val stats = remember(data, today) { Stats(data, today) }
     val focus = remember(stats) { stats.focus() }
     val allFresh = focus.isEmpty()
     val cards = remember(stats) { if (allFresh) stats.allByRest() else focus }
@@ -83,7 +84,7 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item { Column {
-            ScreenTitle("Next workout", prettyDate(LocalDate.now().toString()))
+            ScreenTitle("Next workout", prettyDate(today.toString()))
             Spacer(Modifier.height(8.dp))
             Text(
                 if (allFresh) "Everything is fresh. Pick anything, or rest."
@@ -113,7 +114,7 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
             item { SectionLabel("All areas · tap one to see its movements") }
             items(stats.areas.sortedByDescending { it.ratio }, key = { "all-" + it.area.id }) { st ->
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    AreaRow(st, open = openedBelow == st.area.id) { openArea(st.area.id) }
+                    AreaRow(st, today, open = openedBelow == st.area.id) { openArea(st.area.id) }
                     if (openedBelow == st.area.id) {
                         FocusCard(st, stats, vm, open = st.area.id in expanded) {
                             if (st.area.id in expanded) expanded.remove(st.area.id) else expanded.add(st.area.id)
@@ -138,7 +139,7 @@ private fun FocusCard(st: AreaStatus, stats: Stats, vm: AppViewModel, open: Bool
                 StatusPill(st.status)
             }
             Text(
-                goalText(st), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold,
+                goalText(st, stats.today), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold,
                 color = statusColors(st.status).first,
             )
             Text(whyText(st), style = MaterialTheme.typography.bodySmall, color = Muted)
@@ -182,7 +183,7 @@ private fun MoveDownButton(label: String, onPick: (Int) -> Unit) {
 @Composable
 private fun RestingCard(st: AreaStatus, vm: AppViewModel) {
     val until = java.time.LocalDate.parse(st.area.restUntil)
-    val back = if (until == java.time.LocalDate.now()) "Back tomorrow"
+    val back = if (until == vm.today) "Back tomorrow"
     else "Resting through " + until.format(java.time.format.DateTimeFormatter.ofPattern("EEE"))
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.55f))) {
         Row(Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -245,7 +246,7 @@ private fun MovementRow(m: Movement, stats: Stats, checked: Boolean, onToggle: (
 }
 
 @Composable
-private fun AreaRow(st: AreaStatus, open: Boolean, onClick: () -> Unit) {
+private fun AreaRow(st: AreaStatus, today: LocalDate, open: Boolean, onClick: () -> Unit) {
     val (fg, _) = statusColors(st.status)
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 6.dp),
@@ -257,9 +258,9 @@ private fun AreaRow(st: AreaStatus, open: Boolean, onClick: () -> Unit) {
         )
         TargetBar(st.ratio, fg, Modifier.weight(1f))
         Spacer(Modifier.width(10.dp))
-        val resting = st.area.isResting(LocalDate.now())
+        val resting = st.area.isResting(today)
         Text(
-            if (resting) "moved down" else goalShort(st), Modifier.width(112.dp),
+            if (resting) "moved down" else goalShort(st, today), Modifier.width(112.dp),
             style = MaterialTheme.typography.bodySmall, color = if (resting) Muted else fg, textAlign = TextAlign.End,
         )
     }
@@ -280,7 +281,7 @@ private fun whyText(s: AreaStatus): String {
  */
 @Composable
 private fun RestDayBar(data: AppData, vm: AppViewModel) {
-    val today = LocalDate.now()
+    val today = vm.today
     val restToday = today.toString() in data.restDays
     val recent = (1L..2L).any { today.minusDays(it).toString() in data.restDays }
     if (restToday) {

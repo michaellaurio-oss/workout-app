@@ -97,7 +97,7 @@ fun formatDetail(groups: List<SetGroup>, note: String): String =
  * Last day to finish with [left] schedule days left. Schedule days already skip rest days (a rest
  * day shares the day before's number), so the calendar offset is the same either way.
  */
-private fun deadline(left: Int, @Suppress("UNUSED_PARAMETER") restToday: Boolean, today: LocalDate): String {
+private fun deadline(left: Int, today: LocalDate): String {
     val offset = left - 1
     return when (offset) {
         0 -> "today"
@@ -115,7 +115,7 @@ private fun creditWord(c: Double) = "${formatWeight(c)} credit${if (c == 1.0) ""
 fun goalText(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
     val left = s.daysLeft
     if (left != null && s.partialCredits > 0) {
-        val by = deadline(left, s.restToday, today)
+        val by = deadline(left, today)
         return "Need ${creditWord(s.creditsShort).let { if (s.partialCredits > 0) it.replaceFirst(" credit", " more credit") else it }} $by " +
             "(${formatWeight(s.partialCredits)} of ${formatWeight(s.area.credits)} so far)"
     }
@@ -134,7 +134,7 @@ fun goalText(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
 fun goalShort(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
     val left = s.daysLeft
     if (left != null && s.partialCredits > 0) {
-        val by = deadline(left, s.restToday, today)
+        val by = deadline(left, today)
         return "${formatWeight(s.creditsShort)} short · $by"
     }
     val due = s.dueIn

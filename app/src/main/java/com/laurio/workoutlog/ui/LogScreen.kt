@@ -49,13 +49,13 @@ import java.time.LocalDate
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LogScreen(data: AppData, vm: AppViewModel, onSaved: () -> Unit) {
-    val stats = remember(data) { Stats(data) }
+    val today = vm.today
+    val stats = remember(data, today) { Stats(data, today) }
     var search by rememberSaveable { mutableStateOf("") }
     val q = search.trim().lowercase()
     val hits = if (q.isEmpty()) emptyList() else data.exercises
-        .filter { !it.hidden && it.inSeason(LocalDate.now().monthValue) && it.name.lowercase().contains(q) && !vm.isPicked(it.id) }
+        .filter { !it.hidden && it.inSeason(today.monthValue) && it.name.lowercase().contains(q) && !vm.isPicked(it.id) }
         .take(8)
-    val today = LocalDate.now()
 
     LazyColumn(
         contentPadding = PaddingValues(16.dp),

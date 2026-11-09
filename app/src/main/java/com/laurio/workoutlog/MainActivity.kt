@@ -26,6 +26,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -80,6 +83,14 @@ private fun AppRoot(vm: AppViewModel) {
             }
         }
     }
+    // Keep "today" right if the app stays open past midnight or comes back the next day.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refreshToday() }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000)
+            vm.refreshToday()
+        }
+    }
     // Back goes to the Next tab before leaving the app.
     BackHandler(enabled = tab != Tab.NEXT) { tab = Tab.NEXT }
 
@@ -117,7 +128,7 @@ private fun AppRoot(vm: AppViewModel) {
                     Tab.NEXT -> NextScreen(d, vm)
                     Tab.LOG -> LogScreen(d, vm, onSaved = { tab = Tab.NEXT })
                     Tab.HISTORY -> HistoryScreen(d, vm)
-                    Tab.INSIGHTS -> InsightsScreen(d)
+                    Tab.INSIGHTS -> InsightsScreen(d, vm.today)
                     Tab.EXERCISES -> ExercisesScreen(d, vm)
                     Tab.AREAS -> AreasScreen(d, vm)
                 }

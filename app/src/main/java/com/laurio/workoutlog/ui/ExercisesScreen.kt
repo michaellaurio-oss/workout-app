@@ -59,7 +59,7 @@ import java.time.LocalDate
 
 @Composable
 fun ExercisesScreen(data: AppData, vm: AppViewModel) {
-    val stats = remember(data) { Stats(data) }
+    val stats = remember(data, vm.today) { Stats(data, vm.today) }
     val areaNames = remember(data) { data.areas.associate { it.id to it.label } }
     var editing by remember { mutableStateOf<Exercise?>(null) }
     var adding by remember { mutableStateOf(false) }
@@ -126,7 +126,7 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { exportLauncher.launch("workout-log-backup-${LocalDate.now()}.json") }) {
+                        OutlinedButton(onClick = { exportLauncher.launch("workout-log-backup-${vm.today}.json") }) {
                             Text("Save backup")
                         }
                         OutlinedButton(onClick = { importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) {

@@ -107,6 +107,13 @@ Same portable toolchain as Slam Log (no Android Studio). Paths: `D:\Users\<usern
 
 ## Conventions
 
+- **Today** comes from `AppViewModel.today`, never `LocalDate.now()` in screens: it's refreshed on resume and
+  every minute (`refreshToday`), so an app left in memory overnight doesn't show or log yesterday. Screens key
+  `Stats`/`Insights` on `(data, today)`.
+- `Store.load`: only a file that can't be parsed is set aside; if applying a newer exercise list fails, his data is
+  kept as is. Restore applies on the main thread. Backups open "wt", falling back to "w" for storage apps that
+  don't support truncate.
+
 - Data lives only on the phone; the Backup card on the Exercises tab saves/restores a JSON file.
 - Don't uninstall the app to fix install problems: that deletes his history. Use `install -r`.
 - Plain wording in the UI. Weights are pounds.

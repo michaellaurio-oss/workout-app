@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
@@ -108,6 +109,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     // The workout being put together (survives switching tabs).
     val picked = mutableStateListOf<Pick>()
+
+    /**
+     * The day the screens show. Android can keep the app in memory for days, so this is refreshed
+     * whenever the app comes to the front and once a minute while it's open (see [refreshToday]).
+     */
+    var today by mutableStateOf(LocalDate.now())
+        private set
     var logDate by mutableStateOf(LocalDate.now())
     var logNote by mutableStateOf("")
 
@@ -120,6 +128,17 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 null
             }
         }
+    }
+
+    /**
+     * Moves [today] to the real date when the day changes. The Log tab's date follows along unless
+     * he picked a different day on purpose.
+     */
+    fun refreshToday() {
+        val now = LocalDate.now()
+        if (now == today) return
+        if (logDate == today || logDate.isAfter(now)) logDate = now
+        today = now
     }
 
     /** Applies a change in memory right away, then writes the file in the background. */
@@ -190,7 +209,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         change("Saved ${prettyDate(date)}") { d -> d.copy(sessions = mergeDay(d.sessions, date, items, emptyList(), note)) }
         picked.clear()
         logNote = ""
-        logDate = LocalDate.now()
+        logDate = today
     }
 
     /** Logs an area without specific movements, like "upper" in the old spreadsheet. */
@@ -236,18 +255,18 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Takes today off: nothing on the schedule counts today. The button then hides for three days. */
     fun restToday() {
-        val today = LocalDate.now().toString()
-        change("Rest day. Everything moves out a day") { d -> d.copy(restDays = (d.restDays + today).distinct().sorted()) }
+        val day = today.toString()
+        change("Rest day. Everything moves out a day") { d -> d.copy(restDays = (d.restDays + day).distinct().sorted()) }
     }
 
     fun undoRestToday() {
-        val today = LocalDate.now().toString()
-        change("Rest day undone") { d -> d.copy(restDays = d.restDays - today) }
+        val day = today.toString()
+        change("Rest day undone") { d -> d.copy(restDays = d.restDays - day) }
     }
 
     /** Moves an area down for [days] days (1 = today only), e.g. while a strain heals. */
     fun restArea(areaId: String, days: Int) {
-        val until = LocalDate.now().plusDays((days - 1).coerceAtLeast(0).toLong()).toString()
+        val until = today.plusDays((days - 1).coerceAtLeast(0).toLong()).toString()
         val label = _data.value?.areas?.firstOrNull { it.id == areaId }?.label ?: areaId
         change("$label moved down " + if (days <= 1) "for today" else "for $days days") { d ->
             d.copy(areas = d.areas.map { if (it.id == areaId) it.copy(restUntil = until) else it })
@@ -319,7 +338,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val d = store.read(uri)
-                change("Restored ${d.sessions.size} workout days") { d }
+                withContext(Dispatchers.Main) { change("Restored ${d.sessions.size} workout days") { d } }
             } catch (e: Exception) {
                 message.value = "That file isn't a Workout Log backup (${e.message})"
             }

@@ -78,8 +78,8 @@ private val WINDOWS = listOf("4 wk" to 28, "8 wk" to 56, "All" to null)
 private const val HEATMAP_WEEKS = 17
 
 @Composable
-fun InsightsScreen(data: AppData) {
-    val ins = remember(data) { Insights(data) }
+fun InsightsScreen(data: AppData, today: java.time.LocalDate) {
+    val ins = remember(data, today) { Insights(data, today) }
     var windowIx by rememberSaveable { mutableStateOf(1) }
     var showNever by rememberSaveable { mutableStateOf(false) }
     var progressId by rememberSaveable { mutableStateOf<String?>(null) }
