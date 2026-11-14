@@ -93,6 +93,18 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
   to_seed.py whenever the list changes**: on the next launch `CatalogUpgrade` updates phones that already
   have the app (list wins for names/areas/measures; his targets and in-app additions stay; untouched
   starter-history days are refreshed). A copy of the old data is saved as `workouts-before-catalog-N.json`. Data decisions about his history are in `CLAUDE.local.md` (not committed).
+## iPhone web app (`pwa/`)
+
+- For a friend on iPhone with **their own log**: a home-screen web app published by GitHub Pages
+  (`.github/workflows/pages.yml`, deploys `pwa/` on every push to main) at michaellaurio-oss.github.io/workout-app.
+- **Rule changes go in both apps**: `pwa/logic.js` is a straight port of `Recommend.kt` + `Format.kt` (credits,
+  windows, rest days, move down, focus, goal text). Screens: `pwa/app.js` (Next, Log, History, Exercises, Areas;
+  no Insights yet). Data in localStorage in the same JSON shape as `AppData`, so backups open in either app.
+- Starting list: commercial-gym movements from `gym exercise list.xlsx` (git-ignored), built with
+  `python pwa/build_catalog.py "gym exercise list.xlsx"` -> `pwa/catalog.json`. Bump its `CATALOG_VERSION` when the
+  list changes (the web app adds/updates built-in movements and keeps the user's own settings).
+- Bump `VERSION` in `pwa/sw.js` when files change so phones pick up the new copy offline.
+
 - `web/workout-app.html` is the earlier web version (published as a claude.ai artifact); the phone app replaces it.
 
 ## Build and install

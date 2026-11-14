@@ -1,0 +1,1394 @@
+{
+ "catalogVersion": 1,
+ "restDays": [],
+ "sessions": [],
+ "areas": [
+  {
+   "id": "chest",
+   "label": "Chest",
+   "target": 4,
+   "kind": "strength",
+   "credits": 2.0
+  },
+  {
+   "id": "back",
+   "label": "Back",
+   "target": 4,
+   "kind": "strength",
+   "credits": 2.0
+  },
+  {
+   "id": "shoulders",
+   "label": "Shoulders",
+   "target": 4,
+   "kind": "strength",
+   "credits": 2.0
+  },
+  {
+   "id": "arms",
+   "label": "Arms",
+   "target": 5,
+   "kind": "strength",
+   "credits": 2.0
+  },
+  {
+   "id": "legs",
+   "label": "Legs",
+   "target": 4,
+   "kind": "strength",
+   "credits": 2.0
+  },
+  {
+   "id": "glutes",
+   "label": "Glutes & Hamstrings",
+   "target": 4,
+   "kind": "strength",
+   "credits": 2.0
+  },
+  {
+   "id": "core",
+   "label": "Core",
+   "target": 3,
+   "kind": "strength",
+   "credits": 2.0
+  },
+  {
+   "id": "conditioning",
+   "label": "Conditioning",
+   "target": 3,
+   "kind": "conditioning",
+   "credits": 2.0
+  },
+  {
+   "id": "mobility",
+   "label": "Mobility",
+   "target": 2,
+   "kind": "mobility",
+   "credits": 2.0
+  }
+ ],
+ "exercises": [
+  {
+   "id": "barbell-bench-press",
+   "name": "Barbell bench press",
+   "areas": [
+    "chest",
+    "arms",
+    "shoulders"
+   ],
+   "equip": "Barbell, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "incline-barbell-bench-press",
+   "name": "Incline barbell bench press",
+   "areas": [
+    "chest",
+    "shoulders",
+    "arms"
+   ],
+   "equip": "Barbell, incline bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "dumbbell-bench-press",
+   "name": "Dumbbell bench press",
+   "areas": [
+    "chest",
+    "arms"
+   ],
+   "equip": "Dumbbells, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "incline-dumbbell-press",
+   "name": "Incline dumbbell press",
+   "areas": [
+    "chest",
+    "shoulders"
+   ],
+   "equip": "Dumbbells, incline bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "decline-bench-press",
+   "name": "Decline bench press",
+   "areas": [
+    "chest",
+    "arms"
+   ],
+   "equip": "Barbell, decline bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "machine-chest-press",
+   "name": "Machine chest press",
+   "areas": [
+    "chest",
+    "arms"
+   ],
+   "equip": "Chest press machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "pec-deck",
+   "name": "Pec deck",
+   "areas": [
+    "chest"
+   ],
+   "equip": "Pec deck machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "cable-crossover",
+   "name": "Cable crossover",
+   "areas": [
+    "chest"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "dumbbell-flys",
+   "name": "Dumbbell flys",
+   "areas": [
+    "chest"
+   ],
+   "equip": "Dumbbells, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "push-ups",
+   "name": "Push-ups",
+   "areas": [
+    "chest",
+    "arms",
+    "core"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "dips",
+   "name": "Dips",
+   "areas": [
+    "chest",
+    "arms"
+   ],
+   "equip": "Dip station",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "pull-ups",
+   "name": "Pull-ups",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "Pull-up bar",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "chin-ups",
+   "name": "Chin-ups",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "Pull-up bar",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "lat-pulldown",
+   "name": "Lat pulldown",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "Lat pulldown machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "seated-cable-row",
+   "name": "Seated cable row",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "Cable row machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "barbell-row",
+   "name": "Barbell row",
+   "areas": [
+    "back",
+    "arms",
+    "glutes"
+   ],
+   "equip": "Barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "dumbbell-row",
+   "name": "Dumbbell row",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "Dumbbell, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "t-bar-row",
+   "name": "T-bar row",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "T-bar row",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "machine-row",
+   "name": "Machine row",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "Row machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "straight-arm-pulldown",
+   "name": "Straight-arm pulldown",
+   "areas": [
+    "back"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "face-pulls",
+   "name": "Face pulls",
+   "areas": [
+    "back",
+    "shoulders"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "deadlift",
+   "name": "Deadlift",
+   "areas": [
+    "back",
+    "glutes",
+    "legs"
+   ],
+   "equip": "Barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "back-extension",
+   "name": "Back extension",
+   "areas": [
+    "back",
+    "glutes"
+   ],
+   "equip": "Back extension bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "barbell-shrugs",
+   "name": "Barbell shrugs",
+   "areas": [
+    "back"
+   ],
+   "equip": "Barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "overhead-barbell-press",
+   "name": "Overhead barbell press",
+   "areas": [
+    "shoulders",
+    "arms",
+    "core"
+   ],
+   "equip": "Barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "seated-dumbbell-press",
+   "name": "Seated dumbbell press",
+   "areas": [
+    "shoulders",
+    "arms"
+   ],
+   "equip": "Dumbbells, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "machine-shoulder-press",
+   "name": "Machine shoulder press",
+   "areas": [
+    "shoulders",
+    "arms"
+   ],
+   "equip": "Shoulder press machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "arnold-press",
+   "name": "Arnold press",
+   "areas": [
+    "shoulders",
+    "arms"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "lateral-raises",
+   "name": "Lateral raises",
+   "areas": [
+    "shoulders"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "cable-lateral-raises",
+   "name": "Cable lateral raises",
+   "areas": [
+    "shoulders"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "front-raises",
+   "name": "Front raises",
+   "areas": [
+    "shoulders"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "rear-delt-fly",
+   "name": "Rear delt fly",
+   "areas": [
+    "shoulders",
+    "back"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "reverse-pec-deck",
+   "name": "Reverse pec deck",
+   "areas": [
+    "shoulders",
+    "back"
+   ],
+   "equip": "Pec deck machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "upright-row",
+   "name": "Upright row",
+   "areas": [
+    "shoulders",
+    "back"
+   ],
+   "equip": "Barbell or cable",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "barbell-curl",
+   "name": "Barbell curl",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Barbell or EZ bar",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "dumbbell-curl",
+   "name": "Dumbbell curl",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "hammer-curl",
+   "name": "Hammer curl",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "preacher-curl",
+   "name": "Preacher curl",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Preacher bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "cable-curl",
+   "name": "Cable curl",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "concentration-curl",
+   "name": "Concentration curl",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Dumbbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "triceps-pushdown",
+   "name": "Triceps pushdown",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "overhead-triceps-extension",
+   "name": "Overhead triceps extension",
+   "areas": [
+    "arms"
+   ],
+   "equip": "Cable or dumbbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "skull-crushers",
+   "name": "Skull crushers",
+   "areas": [
+    "arms"
+   ],
+   "equip": "EZ bar, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "close-grip-bench-press",
+   "name": "Close-grip bench press",
+   "areas": [
+    "arms",
+    "chest"
+   ],
+   "equip": "Barbell, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "bench-dips",
+   "name": "Bench dips",
+   "areas": [
+    "arms",
+    "chest"
+   ],
+   "equip": "Bench",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "barbell-back-squat",
+   "name": "Barbell back squat",
+   "areas": [
+    "legs",
+    "glutes",
+    "core"
+   ],
+   "equip": "Squat rack, barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "front-squat",
+   "name": "Front squat",
+   "areas": [
+    "legs",
+    "core"
+   ],
+   "equip": "Squat rack, barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "leg-press",
+   "name": "Leg press",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Leg press machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "hack-squat",
+   "name": "Hack squat",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Hack squat machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "goblet-squat",
+   "name": "Goblet squat",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Dumbbell or kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "bulgarian-split-squat",
+   "name": "Bulgarian split squat",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Dumbbells, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "walking-lunges",
+   "name": "Walking lunges",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "step-ups",
+   "name": "Step-ups",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "Box, dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "leg-extension",
+   "name": "Leg extension",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Leg extension machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "standing-calf-raise",
+   "name": "Standing calf raise",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Calf raise machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "seated-calf-raise",
+   "name": "Seated calf raise",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Seated calf machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "hip-adduction",
+   "name": "Hip adduction",
+   "areas": [
+    "legs"
+   ],
+   "equip": "Adductor machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "romanian-deadlift",
+   "name": "Romanian deadlift",
+   "areas": [
+    "glutes",
+    "back"
+   ],
+   "equip": "Barbell or dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "lying-leg-curl",
+   "name": "Lying leg curl",
+   "areas": [
+    "glutes"
+   ],
+   "equip": "Leg curl machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "seated-leg-curl",
+   "name": "Seated leg curl",
+   "areas": [
+    "glutes"
+   ],
+   "equip": "Leg curl machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "hip-thrust",
+   "name": "Hip thrust",
+   "areas": [
+    "glutes"
+   ],
+   "equip": "Barbell, bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "glute-bridge",
+   "name": "Glute bridge",
+   "areas": [
+    "glutes"
+   ],
+   "equip": "Body weight or barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "cable-kickback",
+   "name": "Cable kickback",
+   "areas": [
+    "glutes"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "hip-abduction",
+   "name": "Hip abduction",
+   "areas": [
+    "glutes"
+   ],
+   "equip": "Abductor machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "good-mornings",
+   "name": "Good mornings",
+   "areas": [
+    "glutes",
+    "back"
+   ],
+   "equip": "Barbell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "single-leg-rdl",
+   "name": "Single-leg RDL",
+   "areas": [
+    "glutes",
+    "legs",
+    "core"
+   ],
+   "equip": "Dumbbells",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "kettlebell-swing",
+   "name": "Kettlebell swing",
+   "areas": [
+    "glutes",
+    "conditioning"
+   ],
+   "equip": "Kettlebell",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "plank",
+   "name": "Plank",
+   "areas": [
+    "core"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "side-plank",
+   "name": "Side plank",
+   "areas": [
+    "core"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "hanging-leg-raise",
+   "name": "Hanging leg raise",
+   "areas": [
+    "core"
+   ],
+   "equip": "Pull-up bar",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "cable-crunch",
+   "name": "Cable crunch",
+   "areas": [
+    "core"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "ab-wheel-rollout",
+   "name": "Ab wheel rollout",
+   "areas": [
+    "core"
+   ],
+   "equip": "Ab wheel",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "russian-twist",
+   "name": "Russian twist",
+   "areas": [
+    "core"
+   ],
+   "equip": "Medicine ball",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "dead-bug",
+   "name": "Dead bug",
+   "areas": [
+    "core"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "pallof-press",
+   "name": "Pallof press",
+   "areas": [
+    "core"
+   ],
+   "equip": "Cable machine",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "decline-sit-ups",
+   "name": "Decline sit-ups",
+   "areas": [
+    "core"
+   ],
+   "equip": "Decline bench",
+   "measures": [
+    "sets",
+    "reps",
+    "weight"
+   ]
+  },
+  {
+   "id": "farmer-s-carry",
+   "name": "Farmer's carry",
+   "areas": [
+    "core",
+    "back",
+    "arms"
+   ],
+   "equip": "Dumbbells or kettlebells",
+   "measures": [
+    "sets",
+    "time",
+    "weight"
+   ]
+  },
+  {
+   "id": "treadmill",
+   "name": "Treadmill",
+   "areas": [
+    "conditioning",
+    "legs"
+   ],
+   "equip": "Treadmill",
+   "measures": [
+    "speed",
+    "incline",
+    "time"
+   ]
+  },
+  {
+   "id": "rowing-machine",
+   "name": "Rowing machine",
+   "areas": [
+    "conditioning",
+    "back",
+    "legs"
+   ],
+   "equip": "Rower",
+   "measures": [
+    "time",
+    "resistance"
+   ]
+  },
+  {
+   "id": "stationary-bike",
+   "name": "Stationary bike",
+   "areas": [
+    "conditioning",
+    "legs"
+   ],
+   "equip": "Bike",
+   "measures": [
+    "time",
+    "resistance"
+   ]
+  },
+  {
+   "id": "elliptical",
+   "name": "Elliptical",
+   "areas": [
+    "conditioning"
+   ],
+   "equip": "Elliptical",
+   "measures": [
+    "time",
+    "resistance"
+   ]
+  },
+  {
+   "id": "stair-climber",
+   "name": "Stair climber",
+   "areas": [
+    "conditioning",
+    "legs",
+    "glutes"
+   ],
+   "equip": "Stair climber",
+   "measures": [
+    "time",
+    "resistance"
+   ]
+  },
+  {
+   "id": "assault-bike",
+   "name": "Assault bike",
+   "areas": [
+    "conditioning",
+    "legs",
+    "shoulders"
+   ],
+   "equip": "Fan bike",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "jump-rope",
+   "name": "Jump rope",
+   "areas": [
+    "conditioning"
+   ],
+   "equip": "Jump rope",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "battle-ropes",
+   "name": "Battle ropes",
+   "areas": [
+    "conditioning",
+    "shoulders",
+    "core"
+   ],
+   "equip": "Battle ropes",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "sled-push",
+   "name": "Sled push",
+   "areas": [
+    "conditioning",
+    "legs"
+   ],
+   "equip": "Sled",
+   "measures": [
+    "sets",
+    "weight"
+   ]
+  },
+  {
+   "id": "box-jumps",
+   "name": "Box jumps",
+   "areas": [
+    "conditioning",
+    "legs"
+   ],
+   "equip": "Plyo box",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "burpees",
+   "name": "Burpees",
+   "areas": [
+    "conditioning",
+    "chest",
+    "legs"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "foam-rolling",
+   "name": "Foam rolling",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Foam roller",
+   "measures": [
+    "time"
+   ]
+  },
+  {
+   "id": "hip-flexor-stretch",
+   "name": "Hip flexor stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "hamstring-stretch",
+   "name": "Hamstring stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "pigeon-pose",
+   "name": "Pigeon pose",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "couch-stretch",
+   "name": "Couch stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "world-s-greatest-stretch",
+   "name": "World's greatest stretch",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "cat-cow",
+   "name": "Cat-cow",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "thoracic-rotations",
+   "name": "Thoracic rotations",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "shoulder-dislocates",
+   "name": "Shoulder dislocates",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Band or dowel",
+   "measures": [
+    "sets",
+    "reps"
+   ]
+  },
+  {
+   "id": "deep-squat-hold",
+   "name": "Deep squat hold",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  },
+  {
+   "id": "90-90",
+   "name": "90-90",
+   "areas": [
+    "mobility"
+   ],
+   "equip": "Body weight",
+   "measures": [
+    "sets",
+    "time"
+   ]
+  }
+ ]
+}
