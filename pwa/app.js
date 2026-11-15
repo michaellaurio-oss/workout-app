@@ -80,7 +80,47 @@
   function exName(id) { const e = data.exercises.find((x) => x.id === id); return e ? e.name : id; }
   function videoBtn(e) {
     if (!e.video) return null;
-    return h("a", { class: "video", href: e.video, target: "_blank", rel: "noopener", "aria-label": "Video for " + e.name, onclick: (ev) => ev.stopPropagation() }, "▶");
+    return h("a", { class: "video", href: videoHref(e), target: "_blank", rel: "noopener", "aria-label": "Video for " + e.name, onclick: (ev) => ev.stopPropagation() }, "▶");
+  }
+
+  // ---------- dead video links ----------
+  // A web page can't ask YouTube whether a video still exists, but its thumbnail tells: a removed video's
+  // thumbnail is a 120x90 gray placeholder instead of the real 320x180 image. Checked about once a week;
+  // a link found dead opens a YouTube search for the movement instead.
+  const VKEY = "workoutlog.videoCheck";
+  const WEEK = 7 * 86400000;
+  let videoCheck = {};
+  try { videoCheck = JSON.parse(localStorage.getItem(VKEY) || "{}") || {}; } catch (e) { videoCheck = {}; }
+  function youtubeId(url) {
+    const m = /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{11})/.exec(url || "");
+    return m ? m[1] : null;
+  }
+  function searchUrl(name) { return "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " proper form"); }
+  function videoHref(e) {
+    const id = youtubeId(e.video);
+    return id && videoCheck[id] && videoCheck[id].dead ? searchUrl(e.name) : e.video;
+  }
+  function checkVideos() {
+    if (!navigator.onLine) return;
+    const now = Date.now();
+    const ids = Array.from(new Set(data.exercises.filter((e) => !e.hidden).map((e) => youtubeId(e.video)).filter(Boolean)))
+      .filter((id) => !videoCheck[id] || now - videoCheck[id].at > WEEK);
+    let changed = false, i = 0;
+    const next = () => {
+      if (i >= ids.length) { if (changed) render(); return; }
+      const id = ids[i++];
+      const img = new Image();
+      img.onload = () => {
+        const dead = img.naturalWidth === 120;
+        if (!!(videoCheck[id] && videoCheck[id].dead) !== dead) changed = true;
+        videoCheck[id] = { dead, at: Date.now() };
+        try { localStorage.setItem(VKEY, JSON.stringify(videoCheck)); } catch (e) {}
+        next();
+      };
+      img.onerror = () => next(); // offline or blocked: leave it for next time
+      img.src = "https://i.ytimg.com/vi/" + id + "/mqdefault.jpg";
+    };
+    next();
   }
   function stats() { return new WL.Stats(data, today); }
   function isPicked(id) { return picked.some((p) => p.ex === id); }
@@ -562,6 +602,7 @@
     render();
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+    setTimeout(checkVideos, 3000);
   }
   start();
 })();
