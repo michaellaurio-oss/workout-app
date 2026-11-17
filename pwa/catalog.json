@@ -8,63 +8,72 @@
    "label": "Chest",
    "target": 4,
    "kind": "strength",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 4
   },
   {
    "id": "back",
    "label": "Back",
    "target": 4,
    "kind": "strength",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 4
   },
   {
    "id": "shoulders",
    "label": "Shoulders",
    "target": 4,
    "kind": "strength",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 4
   },
   {
    "id": "arms",
    "label": "Arms",
    "target": 5,
    "kind": "strength",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 3
   },
   {
    "id": "legs",
    "label": "Legs",
    "target": 4,
    "kind": "strength",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 4
   },
   {
    "id": "glutes",
    "label": "Glutes & Hamstrings",
    "target": 4,
    "kind": "strength",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 4
   },
   {
    "id": "core",
    "label": "Core",
    "target": 3,
    "kind": "strength",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 5
   },
   {
    "id": "conditioning",
    "label": "Conditioning",
    "target": 3,
    "kind": "conditioning",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 5
   },
   {
    "id": "mobility",
    "label": "Mobility",
    "target": 2,
    "kind": "mobility",
-   "credits": 2.0
+   "credits": 2.0,
+   "perWeek": 7
   }
  ],
  "exercises": [

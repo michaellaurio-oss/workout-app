@@ -13,7 +13,8 @@ def main(xlsx):
     to_seed.HIDDEN = []  # those are the home-gym history's old movements
     exercises = to_seed.catalog_from_xlsx(xlsx, {})
     out = {"catalogVersion": CATALOG_VERSION, "restDays": [], "sessions": [],
-           "areas": [dict(id=i, label=l, target=t, kind=k, credits=2.0) for i, l, t, k in to_seed.AREAS],
+           "areas": [dict(id=i, label=l, target=t, kind=k, credits=2.0, perWeek=max(1, round(2 * 7 / t)))
+                     for i, l, t, k in to_seed.AREAS],  # the web app uses perWeek (credits per Sun-Sat week)
            "exercises": exercises}
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "catalog.json")
     with open(path, "w", encoding="utf-8") as f:

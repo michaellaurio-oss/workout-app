@@ -98,8 +98,14 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 - For a friend on iPhone with **their own log**: a home-screen web app published by GitHub Pages
   (`.github/workflows/pages.yml`, deploys `pwa/` on every push to main) at michaellaurio-oss.github.io/workout-app.
 - **Rule changes go in both apps**: `pwa/logic.js` is a straight port of `Recommend.kt` + `Format.kt` (credits,
-  windows, rest days, move down, focus, goal text). Screens: `pwa/app.js` (Next, Log, History, Exercises, Areas;
+  windows, rest days, move down, focus, goal text), plus the web-only weekly mode below. Screens: `pwa/app.js` (Next, Log, History, Exercises, Areas;
   no Insights yet). Data in localStorage in the same JSON shape as `AppData`, so backups open in either app.
+- **Goals are per week in the web app** (his call, 2026-11-16; the friend found "every N days" confusing):
+  `Area.perWeek` credits per calendar week, **Sunday–Saturday** (`Stats(data, today, {weekly:true})` →
+  `weekAreas`). Same credit rules (1 main, ½ also-works). Status labels Done / On track / To do / Behind
+  (`WEEK_STATUS`); ratio = credits still needed per day left ÷ an even pace. No Rest day button in the web app.
+  `perWeek` defaults from the N-day settings (2 every 4 days → 4), so Android backups load. The N-day code in
+  `logic.js` stays the port of Recommend.kt.
 - Starting list: commercial-gym movements from `gym exercise list.xlsx` (git-ignored), built with
   `python pwa/build_catalog.py "gym exercise list.xlsx"` -> `pwa/catalog.json`. Bump its `CATALOG_VERSION` when the
   list changes (the web app adds/updates built-in movements and keeps the user's own settings).

@@ -122,7 +122,8 @@
     };
     next();
   }
-  function stats() { return new WL.Stats(data, today); }
+  // Goals are "X credits per week", Sunday to Saturday (the Android app uses "every N days").
+  function stats() { return new WL.Stats(data, today, { weekly: true }); }
   function isPicked(id) { return picked.some((p) => p.ex === id); }
   function togglePick(id, st) {
     const i = picked.findIndex((p) => p.ex === id);
@@ -148,11 +149,10 @@
     out.push(h("div", null,
       h("h1", null, "Next workout"),
       h("div", { class: "sub" }, WL.prettyDate(today, today)),
-      h("div", { class: "lead" }, allFresh ? "Everything is fresh. Pick anything, or rest." : "Work on: " + focus.map((s) => s.area.label).join(", ")),
+      h("div", { class: "lead" }, allFresh ? "You're on track everywhere. Pick anything, or rest." : "Work on: " + focus.map((s) => s.area.label).join(", ")),
       h("div", { class: "sub small" },
         (allFresh ? "All areas are below, longest since you worked them first; the one you did most recently is last. " : "") +
         "Movements are listed oldest first, so the ones you haven't done in a while are on top. Tick what you do, then tap Log.")));
-    out.push(restDayBar(st));
     if (routine.length) {
       out.push(h("section", { class: "card" },
         h("div", { class: "card-head" }, h("h2", { class: "card-title" }, "Every session")),
@@ -185,23 +185,8 @@
     return out;
   }
 
-  function restDayBar(st) {
-    const rest = new Set(data.restDays);
-    if (rest.has(today)) {
-      return h("div", { class: "card" }, h("div", { class: "btns" },
-        h("div", { class: "grow" }, h("div", { style: "font-weight:700" }, "Rest day today"),
-          h("div", { class: "sub small" }, "Nothing is due today; every area's clock waits a day.")),
-        h("span", { class: "spacer" }),
-        h("button", { class: "btn text", onclick: () => { data.restDays = data.restDays.filter((d) => d !== today); save(); render(); } }, "Undo")));
-    }
-    if (rest.has(WL.addDays(today, -1)) || rest.has(WL.addDays(today, -2))) return null;
-    return h("div", { class: "btns" },
-      h("button", { class: "btn", onclick: () => { data.restDays = Array.from(new Set(data.restDays.concat(today))).sort(); save(); render(); toast("Rest day. Every area gets an extra day."); } }, "Rest day"),
-      h("span", { class: "sub small" }, "Pauses every area's clock for today."));
-  }
-
   function targetBar(s) {
-    const pct = Math.min(1, s.ratio / 2) * 100;
+    const pct = s.weekly ? Math.min(1, s.have / s.need) * 100 : Math.min(1, s.ratio / 2) * 100;
     const color = { FRESH: "var(--fresh)", SOON: "var(--soon)", DUE: "var(--due)", OVERDUE: "var(--overdue)" }[s.status];
     return h("div", { class: "bar" }, h("div", { style: `width:${pct}%;background:${color}` }));
   }
@@ -212,7 +197,7 @@
     const card = h("section", { class: "card", id: "card-" + s.area.id, style: inline ? "padding:12px 0 4px;background:none" : null },
       h("div", { class: "card-head" },
         h("h2", { class: "card-title" }, s.area.label),
-        h("span", { class: "pill s-" + s.status }, WL.STATUS[s.status])),
+        h("span", { class: "pill s-" + s.status }, WL.WEEK_STATUS[s.status])),
       h("div", { class: "goal s-" + s.status }, WL.goalText(s, today)),
       h("div", { class: "sub small" }, WL.whyText(s)),
       list.length ? null : h("div", { class: "muted" }, "No movements here yet. Add some on the Exercises tab."),
@@ -543,7 +528,7 @@
   function renderAreas() {
     const st = stats();
     const out = [h("div", null, h("h1", null, "Areas"),
-      h("div", { class: "sub" }, "How often each area should be worked, and how many credits count as a full workout. Each movement gives 1 credit to its main area and ½ to each area it also works; credits add up across the days of the period."))];
+      h("div", { class: "sub" }, "How many credits each area should get each week (Sunday to Saturday). Each movement you log gives 1 credit to its main area and ½ to each area it also works. A new week starts every Sunday."))];
     for (const a of data.areas) {
       const s = st.areas.find((x) => x.area.id === a.id);
       const stepper = (val, fmt, dec, inc) => h("div", { class: "stepper" },
@@ -551,12 +536,10 @@
         h("span", { class: "val" }, fmt(val)),
         h("button", { class: "btn", "aria-label": "More", onclick: () => { inc(); save(); render(); } }, "+"));
       out.push(h("section", { class: "card" },
-        h("div", { class: "card-head" }, h("h2", { class: "card-title" }, a.label), h("span", { class: "pill s-" + s.status }, WL.STATUS[s.status])),
+        h("div", { class: "card-head" }, h("h2", { class: "card-title" }, a.label), h("span", { class: "pill s-" + s.status }, WL.WEEK_STATUS[s.status])),
         h("div", { class: "sub small" }, WL.goalText(s, today)),
-        h("div", { class: "btns", style: "justify-content:space-between" }, h("span", null, "Every"),
-          stepper(a.target, (v) => v + " day" + (v === 1 ? "" : "s"), () => (a.target = Math.max(1, a.target - 1)), () => (a.target = Math.min(30, a.target + 1)))),
-        h("div", { class: "btns", style: "justify-content:space-between" }, h("span", null, "Credits needed"),
-          stepper(a.credits, WL.num, () => (a.credits = Math.max(0.5, a.credits - 0.5)), () => (a.credits = Math.min(10, a.credits + 0.5))))));
+        h("div", { class: "btns", style: "justify-content:space-between" }, h("span", null, "Credits per week"),
+          stepper(a.perWeek, WL.num, () => (a.perWeek = Math.max(1, a.perWeek - 1)), () => (a.perWeek = Math.min(28, a.perWeek + 1))))));
     }
     return out;
   }

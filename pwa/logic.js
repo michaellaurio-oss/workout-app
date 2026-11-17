@@ -14,6 +14,8 @@
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const STATUS = { FRESH: "Fresh", SOON: "Soon", DUE: "Due", OVERDUE: "Overdue" };
+  /** Labels when goals are per calendar week (Sun-Sat). */
+  const WEEK_STATUS = { FRESH: "Done", SOON: "On track", DUE: "To do", OVERDUE: "Behind" };
 
   // ---------- dates (always local calendar days, as "yyyy-mm-dd") ----------
 
@@ -32,8 +34,11 @@
     return {
       id: String(a.id), label: a.label || String(a.id), target: Number(a.target) || 4, kind: a.kind || "strength",
       credits: credits > 0 ? credits : DEFAULT_CREDITS, restUntil: a.restUntil || "",
+      perWeek: Number(a.perWeek) > 0 ? Number(a.perWeek) : defaultPerWeek(credits > 0 ? credits : DEFAULT_CREDITS, Number(a.target) || 4),
     };
   }
+  /** Credits per week matching "N credits every T days" (2 every 4 days -> 4 a week). Web app only. */
+  function defaultPerWeek(credits, target) { return Math.max(1, Math.round((credits * 7) / Math.max(1, target))); }
   function normExercise(e) {
     const measures = (e.measures || []).filter((m) => MEASURES.includes(m));
     return {
@@ -79,8 +84,13 @@
 
   // ---------- Stats: how due each area is, and what was done last ----------
 
-  function Stats(data, today) {
+  /**
+   * [opts.weekly]: goals are "X credits per week" (Area.perWeek), counted Sunday through Saturday, instead of
+   * the Android app's "credits every N days". The web app uses weekly; the N-day rules stay a port of Recommend.kt.
+   */
+  function Stats(data, today, opts) {
     this.data = data;
+    this.weekly = !!(opts && opts.weekly);
     this.today = today || todayStr();
     this.exById = {};
     for (const e of data.exercises) this.exById[e.id] = e;
@@ -106,6 +116,7 @@
     }
 
     const todayE = epochDay(this.today);
+    if (this.weekly) { this.weekAreas(todayE); return; }
     const todayS = this.scheduleDay(todayE);
     const isRest = this.isRestDay(todayE);
     this.restToday = isRest;
@@ -130,6 +141,27 @@
       };
     });
   }
+
+  /** Per-week goals: credits since Sunday against Area.perWeek; days = days since the area last got a credit. */
+  Stats.prototype.weekAreas = function (todayE) {
+    const dow = new Date(todayE * 86400000).getUTCDay(); // 0 = Sunday
+    const weekStart = todayE - dow;
+    const daysLeft = 7 - dow; // today included; Saturday = 1
+    this.restToday = this.isRestDay(todayE);
+    this.weekEnd = fromEpoch(weekStart + 6);
+    this.areas = this.data.areas.map((a) => {
+      const list = (this.byArea[a.id] || []).filter((x) => x[0] <= todayE);
+      const have = list.filter((x) => x[0] >= weekStart).reduce((t, x) => t + x[1], 0);
+      const last = list.length ? list[list.length - 1][0] : null;
+      const need = a.perWeek;
+      const short = Math.max(0, need - have);
+      // How hard the rest of the week is compared with an even pace: 1 = keeping pace from zero, 2 = twice that.
+      const ratio = short <= 1e-9 ? 0 : (short / daysLeft) / (need / 7);
+      const status = short <= 1e-9 ? "FRESH" : ratio >= 2 ? "OVERDUE" : ratio >= 1 ? "DUE" : "SOON";
+      return { area: a, weekly: true, days: last == null ? null : todayE - last, have, need, short, daysLeft, ratio, status,
+        partialCredits: have, creditsShort: short, partialDays: null, dueIn: null, restToday: this.restToday };
+    });
+  };
 
   Stats.prototype.isRestDay = function (e) { return bsearch(this.restEpochs, e) >= 0; };
   /** Day number on the schedule: the calendar day minus rest days up to and including it. */
@@ -171,10 +203,13 @@
   /** Up to 3 strength areas due (not worked yesterday/today), topped up to 2 with ones coming due, plus cardio/mobility when due. */
   Stats.prototype.focus = function () {
     const rested = (s) => (s.days == null ? 99 : s.days) >= 2;
-    const strength = this.active().filter((s) => s.area.kind === "strength").sort((a, b) => b.ratio - a.ratio);
+    const longest = (a, b) => (b.days == null ? 1e9 : b.days) - (a.days == null ? 1e9 : a.days);
+    const strength = this.active().filter((s) => s.area.kind === "strength")
+      .sort((a, b) => b.ratio - a.ratio || (this.weekly ? longest(a, b) : 0));
     const picked = strength.filter((s) => s.ratio >= 1 && rested(s)).slice(0, 3);
     for (const s of strength) if (picked.length < 2 && !picked.includes(s) && s.ratio >= 0.75 && rested(s)) picked.push(s);
-    const extras = this.active().filter((s) => s.area.kind !== "strength" && s.ratio >= 1).sort((a, b) => b.ratio - a.ratio);
+    const extras = this.active().filter((s) => s.area.kind !== "strength" && s.ratio >= 1)
+      .sort((a, b) => b.ratio - a.ratio || (this.weekly ? longest(a, b) : 0));
     return picked.concat(extras);
   };
   /** When nothing is due: every area, longest since worked first. */
@@ -275,7 +310,13 @@
     return "by " + weekday(addDays(today, offset));
   }
   function creditWord(c) { return num(c) + " credit" + (c === 1 ? "" : "s"); }
+  function weekBy(left) { return left <= 1 ? "today" : left === 2 ? "tomorrow" : "by Sat"; }
   function goalText(s, today) {
+    if (s.weekly) {
+      if (s.short <= 1e-9) return "Done for the week (" + num(s.have) + " of " + num(s.need) + " credits)";
+      return "Need " + creditWord(s.short).replace(" credit", s.have > 0 ? " more credit" : " credit") + " " + weekBy(s.daysLeft) +
+        " (" + num(s.have) + " of " + num(s.need) + " this week)";
+    }
     if (s.daysLeft != null && s.partialCredits > 0) {
       return "Need " + creditWord(s.creditsShort).replace(" credit", " more credit") + " " + deadline(s.daysLeft, today) +
         " (" + num(s.partialCredits) + " of " + num(s.area.credits) + " so far)";
@@ -286,11 +327,13 @@
     return "Need " + creditWord(s.area.credits) + " · " + when;
   }
   function goalShort(s, today) {
+    if (s.weekly) return s.short <= 1e-9 ? "done" : num(s.short) + " short · " + (s.daysLeft <= 1 ? "today" : s.daysLeft + " d left");
     if (s.daysLeft != null && s.partialCredits > 0) return num(s.creditsShort) + " short · " + deadline(s.daysLeft, today);
     const due = s.dueIn;
     return num(s.area.credits) + " short · " + (due == null ? "never" : due > 0 ? "in " + due + " d" : due === 0 ? "today" : -due + " d late");
   }
   function whyText(s) {
+    if (s.weekly) return [s.days == null ? "not worked yet" : "last worked " + ago(s.days), "goal " + creditWord(s.need) + " a week, Sun–Sat"].join(" · ");
     return [s.days == null ? "no full session yet" : "full session " + ago(s.days), "target every " + s.area.target + " days"].join(" · ");
   }
   function measureLabel(m, minutes) {
@@ -301,7 +344,7 @@
   }
 
   const api = {
-    MAIN_CREDIT, ALSO_CREDIT, DEFAULT_CREDITS, MEASURES, DEFAULT_MEASURES, MONTHS, STATUS,
+    MAIN_CREDIT, ALSO_CREDIT, DEFAULT_CREDITS, MEASURES, DEFAULT_MEASURES, MONTHS, STATUS, WEEK_STATUS, defaultPerWeek,
     todayStr, epochDay, addDays, weekday, monthOf, normData, normExercise, groupEmpty, inSeason, isResting, timeInMinutes,
     Stats, prettyDate, ago, formatTime, parseTime, timeForField, formatMonths, formatGroup, formatDetail, goalText, goalShort, whyText,
     measureLabel, measureName, num,
