@@ -1,5 +1,5 @@
 {
- "catalogVersion": 2,
+ "catalogVersion": 3,
  "restDays": [],
  "sessions": [],
  "areas": [
@@ -242,6 +242,35 @@
    "video": "https://www.youtube.com/watch?v=yN6Q1UI_xkE"
   },
   {
+   "id": "trx-chest-press",
+   "name": "TRX chest press",
+   "areas": [
+    "chest",
+    "shoulders",
+    "arms"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=tcwoe85D1lc"
+  },
+  {
+   "id": "trx-chest-fly",
+   "name": "TRX chest fly",
+   "areas": [
+    "chest",
+    "shoulders"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=VeiB4nfSpeQ"
+  },
+  {
    "id": "pull-ups",
    "name": "Pull-ups",
    "areas": [
@@ -437,6 +466,20 @@
    "video": "https://www.youtube.com/watch?v=KbsQ1E8Hg0o"
   },
   {
+   "id": "trx-row",
+   "name": "TRX row",
+   "areas": [
+    "back",
+    "arms"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=N_14s8zFOms"
+  },
+  {
    "id": "overhead-barbell-press",
    "name": "Overhead barbell press",
    "areas": [
@@ -583,6 +626,34 @@
     "weight"
    ],
    "video": "https://www.youtube.com/watch?v=93BUvCE92As"
+  },
+  {
+   "id": "trx-y-raise",
+   "name": "TRX Y raise",
+   "areas": [
+    "shoulders",
+    "back"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=HQD3wCznIYA"
+  },
+  {
+   "id": "trx-face-pull",
+   "name": "TRX face pull",
+   "areas": [
+    "shoulders",
+    "back"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=rSZ37FxuCHU"
   },
   {
    "id": "barbell-curl",
@@ -738,6 +809,32 @@
     "reps"
    ],
    "video": "https://www.youtube.com/watch?v=zcHaDdf4sEM"
+  },
+  {
+   "id": "trx-biceps-curl",
+   "name": "TRX biceps curl",
+   "areas": [
+    "arms"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=Pa8Mls8saXc"
+  },
+  {
+   "id": "trx-triceps-extension",
+   "name": "TRX triceps extension",
+   "areas": [
+    "arms"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=rihH-UI1zDM"
   },
   {
    "id": "barbell-back-squat",
@@ -917,6 +1014,35 @@
    "video": "https://www.youtube.com/watch?v=ScqpbvOZWe8"
   },
   {
+   "id": "trx-squat",
+   "name": "TRX squat",
+   "areas": [
+    "legs",
+    "glutes"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=XfJoFGrr71g"
+  },
+  {
+   "id": "trx-single-leg-squat",
+   "name": "TRX single-leg squat",
+   "areas": [
+    "legs",
+    "glutes",
+    "core"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=taKk_7PTMdk"
+  },
+  {
    "id": "romanian-deadlift",
    "name": "Romanian deadlift",
    "areas": [
@@ -1062,6 +1188,34 @@
    "video": "https://www.youtube.com/watch?v=B_x0tp3HIbk"
   },
   {
+   "id": "trx-hamstring-curl",
+   "name": "TRX hamstring curl",
+   "areas": [
+    "glutes",
+    "core"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=ckOKTSnOCx0"
+  },
+  {
+   "id": "trx-hip-press",
+   "name": "TRX hip press",
+   "areas": [
+    "glutes",
+    "core"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=dIZbQ0KMFAs"
+  },
+  {
    "id": "plank",
    "name": "Plank",
    "areas": [
@@ -1197,6 +1351,34 @@
     "weight"
    ],
    "video": "https://www.youtube.com/watch?v=VBobkldqqvk"
+  },
+  {
+   "id": "trx-pike",
+   "name": "TRX pike",
+   "areas": [
+    "core",
+    "shoulders"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=eCkgdkJJhjM"
+  },
+  {
+   "id": "trx-knee-tuck",
+   "name": "TRX knee tuck",
+   "areas": [
+    "core",
+    "shoulders"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=4Q1AAkNASD4"
   },
   {
    "id": "treadmill",
@@ -1355,6 +1537,34 @@
     "reps"
    ],
    "video": "https://www.youtube.com/watch?v=wGvBfVeCNko"
+  },
+  {
+   "id": "trx-mountain-climbers",
+   "name": "TRX mountain climbers",
+   "areas": [
+    "conditioning",
+    "core"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "time"
+   ],
+   "video": "https://www.youtube.com/watch?v=ERm9SgIeIpc"
+  },
+  {
+   "id": "trx-jump-squat",
+   "name": "TRX jump squat",
+   "areas": [
+    "conditioning",
+    "legs"
+   ],
+   "equip": "TRX straps",
+   "measures": [
+    "sets",
+    "reps"
+   ],
+   "video": "https://www.youtube.com/watch?v=CG6U6THBAAE"
   },
   {
    "id": "foam-rolling",

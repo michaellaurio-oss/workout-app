@@ -7,7 +7,7 @@ import json, os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "web"))
 import to_seed
 
-CATALOG_VERSION = 2
+CATALOG_VERSION = 3
 
 def main(xlsx):
     to_seed.HIDDEN = []  # those are the home-gym history's old movements

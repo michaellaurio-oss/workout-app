@@ -109,6 +109,7 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 - Starting list: commercial-gym movements from `gym exercise list.xlsx` (git-ignored), built with
   `python pwa/build_catalog.py "gym exercise list.xlsx"` -> `pwa/catalog.json`. Bump its `CATALOG_VERSION` when the
   list changes (the web app adds/updates built-in movements and keeps the user's own settings).
+- Includes 15 TRX (suspension strap) movements, equipment "TRX straps" (list version 3).
 - Every gym movement has a YouTube form video (Video column of the gym list). Dead links: about once a week the app
   loads each video's thumbnail (`checkVideos` in `app.js`); a 120px-wide placeholder means the video is gone, and
   the ▶ button then opens a YouTube search for "<movement> proper form" instead.
