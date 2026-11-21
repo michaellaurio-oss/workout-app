@@ -113,6 +113,10 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 - Every gym movement has a YouTube form video (Video column of the gym list). Dead links: about once a week the app
   loads each video's thumbnail (`checkVideos` in `app.js`); a 120px-wide placeholder means the video is gone, and
   the ▶ button then opens a YouTube search for "<movement> proper form" instead.
+- **Keep the friend's guide in sync (his standing request, 2026-11-20):** whenever the web app's behavior, screens or
+  starting list change, update the claude.ai doc "Workout Log for iPhone: Getting Started"
+  (claude.ai/artifact/7hNpqJUVWjdDW3BqgK3Jta) AND regenerate `Workout Log for iPhone Getting Started.docx` in the repo
+  root on his PC (same text; built with pandoc from markdown). Same commit as the app change.
 - Bump `VERSION` in `pwa/sw.js` when files change so phones pick up the new copy offline.
 
 - `web/workout-app.html` is the earlier web version (published as a claude.ai artifact); the phone app replaces it.
