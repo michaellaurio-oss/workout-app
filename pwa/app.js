@@ -26,24 +26,42 @@
     try { localStorage.setItem(KEY, JSON.stringify(data)); }
     catch (e) { toast("Couldn't save on this phone. Save a backup now."); }
   }
+  /** Saved data, or null if there is none. Data that can't be read is kept under another name, never overwritten. */
+  let keptUnreadable = false;
   function loadSaved() {
-    try { const t = localStorage.getItem(KEY); return t ? WL.normData(JSON.parse(t)) : null; } catch (e) { return null; }
+    let t = null;
+    try { t = localStorage.getItem(KEY); } catch (e) { return null; }
+    if (!t) return null;
+    try { return WL.normData(JSON.parse(t)); }
+    catch (e) {
+      try { localStorage.setItem(KEY + ".unreadable-" + Date.now(), t); keptUnreadable = true; } catch (e2) { keptUnreadable = false; }
+      return null;
+    }
   }
   function starter() { return WL.normData(JSON.parse(JSON.stringify(catalog))); }
 
-  /** A newer built-in list: names, areas and measures from the list; their own settings and additions stay. */
+  function listVersion() { return catalog ? Number(catalog.webCatalogVersion || catalog.catalogVersion) || 1 : 0; }
+  function isBuiltIn(id) { return !!catalog && catalog.exercises.some((x) => x.id === id); }
+  /**
+   * A newer built-in list (webCatalogVersion, separate from the Android app's catalogVersion): new movements
+   * are added; built-in ones get the list's name, areas, measures and equipment unless they edited the movement
+   * (Exercise.edited). Deleted built-ins stay hidden, and their own settings and movements stay.
+   */
   function upgrade(d) {
-    if (!catalog || (catalog.catalogVersion || 1) <= d.catalogVersion) return d;
+    const version = listVersion();
+    // 0 = a log restored from the Android app: it keeps its own list.
+    if (!catalog || d.webCatalogVersion === 0 || version <= d.webCatalogVersion) return d;
     const byId = {};
     d.exercises.forEach((e) => (byId[e.id] = e));
     for (const raw of catalog.exercises) {
       const c = WL.normExercise(raw), e = byId[c.id];
       if (!e) { d.exercises.push(c); continue; }
-      Object.assign(e, { name: c.name, areas: c.areas, measures: c.measures, equip: c.equip,
-        everySession: e.everySession || c.everySession, pinned: e.pinned || c.pinned,
-        months: c.months.length ? c.months : e.months, video: c.video || e.video });
+      if (!e.edited) Object.assign(e, { name: c.name, areas: c.areas, measures: c.measures, equip: c.equip });
+      Object.assign(e, { everySession: e.everySession || c.everySession, pinned: e.pinned || c.pinned });
+      // Season and video: the list's (it may fix a dead link), unless they edited the movement or the list has none.
+      if (!e.edited) Object.assign(e, { months: c.months.length ? c.months : e.months, video: c.video || e.video });
     }
-    d.catalogVersion = catalog.catalogVersion;
+    d.webCatalogVersion = version;
     return d;
   }
 
@@ -67,7 +85,7 @@
     t.replaceChildren(...[h("span", null, msg), action ? h("button", { onclick: () => { t.hidden = true; fn(); } }, action) : null].filter(Boolean));
     t.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => (t.hidden = true), action ? 6000 : 3000);
+    toastTimer = setTimeout(() => (t.hidden = true), action ? Math.max(6000, msg.length * 60) : 3000);
   }
   function openSheet(build) {
     const card = $("#sheet-card");
@@ -78,8 +96,9 @@
   function closeSheet() { $("#sheet").hidden = true; $("#sheet-card").replaceChildren(); }
   function areaLabel(id) { const a = data.areas.find((x) => x.id === id); return a ? a.label : id; }
   function exName(id) { const e = data.exercises.find((x) => x.id === id); return e ? e.name : id; }
+  function isWebLink(url) { return /^https?:\/\//i.test(url || ""); }
   function videoBtn(e) {
-    if (!e.video) return null;
+    if (!isWebLink(e.video)) return null;
     return h("a", { class: "video", href: videoHref(e), target: "_blank", rel: "noopener", "aria-label": "Video for " + e.name, onclick: (ev) => ev.stopPropagation() }, "▶");
   }
 
@@ -107,7 +126,12 @@
       .filter((id) => !videoCheck[id] || now - videoCheck[id].at > WEEK);
     let changed = false, i = 0;
     const next = () => {
-      if (i >= ids.length) { if (changed) render(); return; }
+      if (i >= ids.length) {
+        // The new links show on the next redraw anyway; don't redraw under someone typing (it closes the keyboard).
+        const typing = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+        if (changed && !typing) render();
+        return;
+      }
       const id = ids[i++];
       const img = new Image();
       img.onload = () => {
@@ -251,7 +275,6 @@
     const out = [h("div", null, h("h1", null, "Log a workout"), h("div", { class: "sub" }, "What you did, with sets, weights and times."))];
     const date = h("input", { type: "date", value: logDate, max: today, onchange: (ev) => { logDate = ev.target.value || today; render(); } });
     out.push(h("label", { class: "field" }, "Date", date));
-    if (data.restDays.includes(logDate)) out.push(h("div", { class: "sub small" }, "This is a rest day: it's saved in History but gives no credits."));
 
     for (const p of picked) out.push(pickedCard(p, st));
 
@@ -345,11 +368,9 @@
       const y = s.date.slice(0, 4);
       if (y !== year && y !== today.slice(0, 4)) { out.push(h("div", { class: "section" }, y)); }
       year = y;
-      const rest = data.restDays.includes(s.date);
       const card = h("section", { class: "card" },
         h("div", { class: "card-head" },
-          h("div", { style: "flex:1;font-weight:700" }, WL.prettyDate(s.date, today)),
-          rest ? h("span", { class: "pill", style: "color:var(--muted)" }, "rest day") : null),
+          h("div", { style: "flex:1;font-weight:700" }, WL.prettyDate(s.date, today))),
         s.items.map((it) => h("div", { class: "row tap", onclick: () => progress(it.ex) },
           h("div", { class: "grow" }, h("div", null, exName(it.ex)), h("div", { class: "sub small" }, WL.formatDetail(it.groups, it.note))))),
         s.areas.length ? h("div", { class: "sub" }, "Worked: " + s.areas.map(areaLabel).join(", ")) : null,
@@ -457,7 +478,8 @@
         delRow.replaceChildren(h("span", { class: "sub small" }, used ? "Your history keeps its name." : "Delete " + e.name + "?"),
           h("span", { class: "spacer" }),
           h("button", { class: "btn danger", onclick: () => {
-            if (used) e.hidden = true; else data.exercises = data.exercises.filter((x) => x !== e);
+            // Hidden, not removed, when history uses it or it's from the starting list (so a list update can't bring it back).
+            if (used || isBuiltIn(e.id)) e.hidden = true; else data.exercises = data.exercises.filter((x) => x !== e);
             picked = picked.filter((p) => p.ex !== e.id);
             save(); close(); render(); toast("Deleted " + e.name + ".");
           } }, "Delete"));
@@ -478,7 +500,9 @@
           if (!n) { name.focus(); return; }
           const clash = data.exercises.find((x) => !x.hidden && x !== e && x.name.toLowerCase() === n.toLowerCase());
           if (clash) { toast("There's already a movement called " + clash.name + "."); return; }
-          Object.assign(f, { name: n, equip: equip.value.trim(), video: video.value.trim() });
+          const link = video.value.trim();
+          if (link && !isWebLink(link)) { toast("Use a web link starting with https://"); video.focus(); return; }
+          Object.assign(f, { name: n, equip: equip.value.trim(), video: link, edited: true });
           if (!f.measures.length) f.measures = WL.DEFAULT_MEASURES.slice();
           if (isNew) {
             let id = n.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "movement";
@@ -580,10 +604,13 @@
     try { catalog = await (await fetch("catalog.json", { cache: "no-cache" })).json(); } catch (e) { catalog = null; }
     data = loadSaved();
     if (data) {
-      const before = data.catalogVersion;
+      const before = data.webCatalogVersion;
       data = upgrade(data);
-      if (data.catalogVersion !== before) save();
-    } else if (catalog) { data = starter(); save(); }
+      if (data.webCatalogVersion !== before) save();
+    } else if (catalog) {
+      data = starter(); save();
+      if (keptUnreadable) toast("Your saved log couldn't be read, so a copy was kept and the app started fresh. Restore your latest backup on the Exercises tab, or ask Michael.", "OK", () => {});
+    }
     else { $("#screen").replaceChildren(h("p", null, "Couldn't load the exercise list. Check the connection and reopen.")); return; }
     render();
     try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}

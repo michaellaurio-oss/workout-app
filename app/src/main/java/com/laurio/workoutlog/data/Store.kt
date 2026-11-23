@@ -46,6 +46,8 @@ class Store(private val context: Context) {
         val catalog = JSONObject(asset("catalog.json") ?: return data)
         val version = catalog.optInt("catalogVersion", 1)
         if (version <= data.catalogVersion) return data
+        // A log from the iPhone web app (restored here) keeps its gym list; his home-gym list isn't merged in.
+        if (data.webCatalogVersion > 0) return data
         val retired = catalog.optJSONArray("retired")?.let { a -> (0 until a.length()).map { a.getString(it) }.toSet() } ?: emptySet()
         val merged = catalog.optJSONObject("merged")?.let { o -> o.keys().asSequence().associateWith { o.getString(it) } } ?: emptyMap()
         return CatalogUpgrade.apply(data, AppData.fromJson(catalog), retired, version, AppData.fromJson(starterJson()).sessions, merged)

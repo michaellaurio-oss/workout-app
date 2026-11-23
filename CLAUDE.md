@@ -105,10 +105,19 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
   `weekAreas`). Same credit rules (1 main, ½ also-works). Status labels Done / On track / To do / Behind
   (`WEEK_STATUS`); ratio = credits still needed per day left ÷ an even pace. No Rest day button in the web app.
   `perWeek` defaults from the N-day settings (2 every 4 days → 4), so Android backups load. The N-day code in
-  `logic.js` stays the port of Recommend.kt.
+  `logic.js` stays the port of Recommend.kt. Weekly mode ignores `restDays` (kept in the data for Android) and
+  counts an area-only log as the whole week's goal.
 - Starting list: commercial-gym movements from `gym exercise list.xlsx` (git-ignored), built with
   `python pwa/build_catalog.py "gym exercise list.xlsx"` -> `pwa/catalog.json`. Bump its `CATALOG_VERSION` when the
-  list changes (the web app adds/updates built-in movements and keeps the user's own settings).
+  list changes. The web app's list version is **`webCatalogVersion`**, separate from the Android app's
+  `catalogVersion` (2026-11-22 code review): 0 = a log restored from the Android app, which never gets the gym list;
+  the Android app never applies its home list to data with `webCatalogVersion` > 0 (`AppData.webCatalogVersion`,
+  `Store.upgrade`) and keeps the field. A list update (`upgrade` in `app.js`) adds new movements and refreshes
+  built-in ones, except those marked `Exercise.edited` (any movement the user saved in the movement sheet, and their
+  own new ones). Deleting a built-in movement only hides it, so an update can't bring it back.
+- Unreadable saved data is kept as `workoutlog.data.unreadable-<time>` before starting fresh (with a notice).
+  Video links must be http(s). The service worker is network-first but serves the saved copy after 3 s (and for
+  the next 20 s, so a slow gym signal costs 3 s once).
 - Includes 15 TRX (suspension strap) movements, equipment "TRX straps" (list version 3).
 - Every gym movement has a YouTube form video (Video column of the gym list). Dead links: about once a week the app
   loads each video's thumbnail (`checkVideos` in `app.js`); a 120px-wide placeholder means the video is gone, and

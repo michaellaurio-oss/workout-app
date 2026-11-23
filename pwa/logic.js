@@ -46,6 +46,7 @@
       hidden: !!e.hidden, measures: measures.length ? measures : DEFAULT_MEASURES.slice(),
       everySession: !!e.everySession, pinned: !!e.pinned,
       months: (e.months || []).map(Number).filter((m) => m >= 1 && m <= 12), video: (e.video || "").trim(),
+      edited: !!e.edited, // web app: they changed this built-in movement, so list updates leave its details alone
     };
   }
   function normGroup(g) {
@@ -62,9 +63,15 @@
   /** Reads saved data or a backup (Android or web). Throws if it isn't Workout Log data. */
   function normData(o) {
     if (!o || !Array.isArray(o.areas) || !o.areas.length) throw new Error("No body areas in this file");
+    // The web app's gym list has its own version number, separate from the Android app's home-gym list
+    // (catalogVersion). 0 = a log from the Android app: the gym list is never merged into it. Web logs saved
+    // before the split have no webCatalogVersion and are recognised by perWeek on their areas.
+    const webVersion = o.webCatalogVersion != null ? Number(o.webCatalogVersion) || 0
+      : o.areas.some((a) => a && a.perWeek != null) ? Number(o.catalogVersion) || 1 : 0;
     return {
       version: 1,
       catalogVersion: Number(o.catalogVersion) || 1,
+      webCatalogVersion: webVersion,
       restDays: Array.from(new Set(o.restDays || [])).sort(),
       areas: o.areas.map(normArea),
       exercises: (o.exercises || []).map(normExercise),
@@ -98,7 +105,8 @@
     this.countEx = {};
     this.restEpochs = data.restDays.map(epochDay).filter((n) => !isNaN(n)).sort((a, b) => a - b);
     this.needed = {};
-    for (const a of data.areas) this.needed[a.id] = a.credits;
+    // An area-only log ("upper") counts as a full set: the period's credits, or the whole week's goal.
+    for (const a of data.areas) this.needed[a.id] = this.weekly ? a.perWeek : a.credits;
     this.byArea = {};
 
     const sessions = data.sessions.slice().sort((a, b) => (a.date < b.date ? -1 : 1));
@@ -109,8 +117,9 @@
         if (!prev || prev.date < s.date) this.lastEx[item.ex] = { date: s.date, groups: item.groups, note: item.note };
       }
       const day = epochDay(s.date);
-      // Workouts logged on a rest day are kept in History but give no credits.
-      if (this.isRestDay(day)) continue;
+      // Workouts logged on a rest day are kept in History but give no credits. Weekly goals have no rest
+      // days (the web app has no Rest day button; ones from an Android backup are kept but ignored).
+      if (!this.weekly && this.isRestDay(day)) continue;
       const credits = this.creditsFor(s);
       for (const a in credits) if (credits[a] > 0) (this.byArea[a] = this.byArea[a] || []).push([day, credits[a]]);
     }

@@ -226,6 +226,8 @@ data class Session(
 /**
  * [catalogVersion] = which built-in exercise list this data has been updated to (see Store.upgrade).
  * [restDays] = days (yyyy-MM-dd) he took off with the Rest day button: they don't count on the schedule.
+ * [webCatalogVersion] > 0 = this log came from the iPhone web app (its gym list's version): his home-gym list
+ * is never applied to it, and the number is kept so the web app can still update it after a round trip.
  */
 data class AppData(
     val areas: List<Area>,
@@ -233,11 +235,13 @@ data class AppData(
     val sessions: List<Session>,
     val catalogVersion: Int = 1,
     val restDays: List<String> = emptyList(),
+    val webCatalogVersion: Int = 0,
 ) {
     fun toJson(): JSONObject = JSONObject()
         .put("version", 1)
         .put("catalogVersion", catalogVersion)
         .put("restDays", JSONArray(restDays.sorted()))
+        .apply { if (webCatalogVersion > 0) put("webCatalogVersion", webCatalogVersion) }
         .put("areas", JSONArray().apply { areas.forEach { put(it.toJson()) } })
         .put("exercises", JSONArray().apply { exercises.forEach { put(it.toJson()) } })
         .put("sessions", JSONArray().apply { sessions.sortedBy { it.date }.forEach { put(it.toJson()) } })
@@ -256,6 +260,7 @@ data class AppData(
                 sessions = list("sessions") { Session.fromJson(it) }.sortedByDescending { it.date },
                 catalogVersion = o.optInt("catalogVersion", 1),
                 restDays = o.optJSONArray("restDays").strings().distinct().sorted(),
+                webCatalogVersion = o.optInt("webCatalogVersion", 0),
             )
         }
     }
