@@ -217,30 +217,38 @@ private fun RoutineCard(list: List<Movement>, stats: Stats, vm: AppViewModel) {
 
 @Composable
 private fun MovementRow(m: Movement, stats: Stats, checked: Boolean, onToggle: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Checkbox(checked = checked, onCheckedChange = { onToggle() })
-        Column(Modifier.weight(1f)) {
-            Text(m.exercise.name, style = MaterialTheme.typography.bodyLarge)
-            if (m.exercise.equip.isNotBlank()) {
-                Text(m.exercise.equip, style = MaterialTheme.typography.bodySmall, color = Muted)
-            }
-        }
-        VideoButton(m.exercise.video, m.exercise.name)
-        Spacer(Modifier.width(8.dp))
-        Column(horizontalAlignment = Alignment.End) {
-            val last = m.last
-            if (last == null) {
-                Text("never logged", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-            } else {
-                Text(ago(stats.daysAgo(last.date)), style = MaterialTheme.typography.bodySmall, color = Muted)
-                val detail = formatDetail(last.groups, last.note)
-                if (detail.isNotEmpty()) {
-                    Text(detail, style = MaterialTheme.typography.labelSmall, color = Muted, textAlign = TextAlign.End)
+    val last = m.last
+    val note = last?.note?.trim().orEmpty()
+    Column(Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(vertical = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = checked, onCheckedChange = { onToggle() })
+            Column(Modifier.weight(1f)) {
+                Text(m.exercise.name, style = MaterialTheme.typography.bodyLarge)
+                if (m.exercise.equip.isNotBlank()) {
+                    Text(m.exercise.equip, style = MaterialTheme.typography.bodySmall, color = Muted)
                 }
             }
+            VideoButton(m.exercise.video, m.exercise.name)
+            Spacer(Modifier.width(8.dp))
+            Column(horizontalAlignment = Alignment.End) {
+                if (last == null) {
+                    Text("never logged", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                } else {
+                    Text(ago(stats.daysAgo(last.date)), style = MaterialTheme.typography.bodySmall, color = Muted)
+                    // Sets, reps and weight only; the note gets its own line below so it can't squeeze the name.
+                    val detail = formatDetail(last.groups, "")
+                    if (detail.isNotEmpty()) {
+                        Text(detail, style = MaterialTheme.typography.labelSmall, color = Muted, textAlign = TextAlign.End)
+                    }
+                }
+            }
+        }
+        if (note.isNotEmpty()) {
+            // Lined up with the name (past the checkbox), full width.
+            Text(
+                note, Modifier.padding(start = 48.dp, end = 4.dp),
+                style = MaterialTheme.typography.labelSmall, color = Muted,
+            )
         }
     }
 }

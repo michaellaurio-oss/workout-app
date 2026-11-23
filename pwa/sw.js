@@ -1,5 +1,5 @@
 // Offline support: keeps the app's files so it opens without a connection. Bump VERSION when files change.
-const VERSION = "wl-4";
+const VERSION = "wl-5";
 const FILES = ["./", "index.html", "app.css", "app.js", "logic.js", "catalog.json", "manifest.json", "icon-180.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", (e) => {

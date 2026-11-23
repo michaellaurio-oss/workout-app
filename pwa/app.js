@@ -232,14 +232,17 @@
 
   function movementRow(m, st) {
     const e = m.exercise;
-    const detail = m.last ? WL.formatDetail(m.last.groups, m.last.note) : "";
-    return h("div", { class: "row tap", onclick: () => { togglePick(e.id, st); render(); } },
+    // Sets, reps and weight on the right; the note gets its own line below so it can't squeeze the name.
+    const detail = m.last ? WL.formatDetail(m.last.groups, "") : "";
+    const note = m.last ? (m.last.note || "").trim() : "";
+    return h("div", { class: "row tap wrap", onclick: () => { togglePick(e.id, st); render(); } },
       h("span", { class: "check" + (isPicked(e.id) ? " on" : "") }),
       h("div", { class: "grow" }, h("div", null, e.name), e.equip ? h("div", { class: "sub small" }, e.equip) : null),
       videoBtn(e),
       h("div", { class: "right" },
         m.last ? [h("div", { class: "sub small" }, WL.ago(st.daysAgo(m.last.date))), detail ? h("div", { class: "sub", style: "font-size:12px" }, detail) : null]
-          : h("div", { class: "never" }, "never logged")));
+          : h("div", { class: "never" }, "never logged")),
+      note ? h("div", { class: "sub note" }, note) : null);
   }
 
   // ---------- Log ----------
