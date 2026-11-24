@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -230,7 +231,8 @@ private fun MovementRow(m: Movement, stats: Stats, checked: Boolean, onToggle: (
             }
             VideoButton(m.exercise.video, m.exercise.name)
             Spacer(Modifier.width(8.dp))
-            Column(horizontalAlignment = Alignment.End) {
+            // Capped so several weights ("1×12 @ 30 lb, 2×12 @ 35 lb, …") wrap here instead of squeezing the name.
+            Column(Modifier.widthIn(max = 150.dp), horizontalAlignment = Alignment.End) {
                 if (last == null) {
                     Text("never logged", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                 } else {
