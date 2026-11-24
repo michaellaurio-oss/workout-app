@@ -474,16 +474,21 @@
       };
       const used = !isNew && data.sessions.some((s) => s.items.some((i) => i.ex === e.id));
       const delRow = h("div", { class: "btns" });
-      if (!isNew) delRow.append(h("button", { class: "btn text danger", onclick: () => {
-        delRow.replaceChildren(h("span", { class: "sub small" }, used ? "Your history keeps its name." : "Delete " + e.name + "?"),
+      const showDeleteButton = () => delRow.replaceChildren(h("button", { class: "btn text danger", onclick: askDelete }, "Delete movement"));
+      function askDelete() {
+        delRow.replaceChildren(
+          h("span", { class: "sub small" }, "Delete " + e.name + "?" + (used ? " Your history keeps its name." : "")),
           h("span", { class: "spacer" }),
+          h("button", { class: "btn text", onclick: showDeleteButton }, "Keep"),
           h("button", { class: "btn danger", onclick: () => {
             // Hidden, not removed, when history uses it or it's from the starting list (so a list update can't bring it back).
             if (used || isBuiltIn(e.id)) e.hidden = true; else data.exercises = data.exercises.filter((x) => x !== e);
             picked = picked.filter((p) => p.ex !== e.id);
             save(); close(); render(); toast("Deleted " + e.name + ".");
           } }, "Delete"));
-      } }, "Delete movement"));
+        delRow.scrollIntoView({ behavior: "smooth", block: "nearest" }); // the question is always in view
+      }
+      if (!isNew) showDeleteButton();
       return [
         h("div", { class: "card-head" }, h("h2", { style: "flex:1" }, isNew ? "New movement" : "Edit movement"), h("button", { class: "btn text", onclick: close }, "Cancel")),
         h("label", { class: "field" }, "Name", name),

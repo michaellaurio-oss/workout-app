@@ -235,6 +235,22 @@ private fun ExerciseDialog(
     var pinned by remember { mutableStateOf(original?.pinned ?: false) }
     val months = remember { mutableStateListOf<Int>().apply { addAll(original?.months ?: emptyList()) } }
 
+    if (confirmDelete && original != null) {
+        // Its own dialog on top of the editor, so the question is always in view.
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text("Delete ${original.name}?") },
+            text = {
+                Text(
+                    if (timesLogged > 0) "It's in $timesLogged logged workouts. Those stay in History; it just leaves the lists."
+                    else "It has never been logged.",
+                )
+            },
+            confirmButton = { TextButton(onClick = { onDelete(original) }) { Text("Delete", color = MaterialTheme.colorScheme.error) } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Keep") } },
+        )
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (original == null) "Add movement" else "Edit movement") },
@@ -287,20 +303,8 @@ private fun ExerciseDialog(
                     }
                 }
                 if (original != null) {
-                    if (!confirmDelete) {
-                        TextButton(onClick = { confirmDelete = true }) {
-                            Text("Delete this movement", color = MaterialTheme.colorScheme.error)
-                        }
-                    } else {
-                        Text(
-                            if (timesLogged > 0) "It's in $timesLogged logged workouts. Those stay in History; it just leaves the lists."
-                            else "It has never been logged.",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                        Row {
-                            TextButton(onClick = { onDelete(original) }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
-                            TextButton(onClick = { confirmDelete = false }) { Text("Keep") }
-                        }
+                    TextButton(onClick = { confirmDelete = true }) {
+                        Text("Delete this movement", color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
