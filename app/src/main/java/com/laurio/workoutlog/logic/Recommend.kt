@@ -154,7 +154,21 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
         val picked = strength.filter { it.ratio >= 1 && rested(it) }.take(3).toMutableList()
         for (s in strength) if (picked.size < 2 && s !in picked && s.ratio >= 0.75 && rested(s)) picked.add(s)
         val extras = active().filter { it.area.kind != "strength" && it.ratio >= 1 }.sortedByDescending { it.ratio }
-        return picked + extras
+        // Which areas is decided by how due they are; the cards are shown soonest deadline first.
+        return byDeadline(picked) + byDeadline(extras)
+    }
+
+    /**
+     * Soonest deadline first, the one each card shows: the day open credits run out (daysLeft), else days until
+     * due (dueIn; negative = overdue); never-done areas first. Ties: the more overdue (ratio) first.
+     */
+    fun byDeadline(list: List<AreaStatus>): List<AreaStatus> =
+        list.sortedWith(compareBy<AreaStatus> { deadlineDays(it) }.thenByDescending { it.ratio })
+
+    private fun deadlineDays(s: AreaStatus): Int {
+        val left = s.daysLeft
+        if (left != null && s.partialCredits > 0) return left
+        return s.dueIn ?: Int.MIN_VALUE
     }
 
     /** Areas he isn't resting today. */

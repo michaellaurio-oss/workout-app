@@ -113,7 +113,7 @@ fun NextScreen(data: AppData, vm: AppViewModel) {
         }
         if (!allFresh) {
             item { SectionLabel("All areas · tap one to see its movements") }
-            items(stats.areas.sortedByDescending { it.ratio }, key = { "all-" + it.area.id }) { st ->
+            items(stats.byDeadline(stats.areas), key = { "all-" + it.area.id }) { st ->
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     AreaRow(st, today, open = openedBelow == st.area.id) { openArea(st.area.id) }
                     if (openedBelow == st.area.id) {

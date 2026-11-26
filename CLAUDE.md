@@ -20,7 +20,9 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   "Need 1 more credit by Thu (1 of 2 so far)" / "Need 2 credits · due in 2 days" (`goalText`, `goalShort`
   in `logic/Format.kt`).
 - Recommendation (`Stats.focus`): up to 3 strength areas at/over target and not worked in the last day,
-  topped up to 2 with ones at >= 75% of target, plus Conditioning/Mobility when due.
+  topped up to 2 with ones at >= 75% of target, plus Conditioning/Mobility when due. The cards (and the All areas
+  list) are shown **soonest deadline first** (`Stats.byDeadline`: open credits' `daysLeft`, else `dueIn`; never done
+  first; ties by ratio), his call 2026-11-25. Which areas are picked still goes by ratio.
   When nothing is due, the Next tab shows every area instead (`Stats.allByRest`), longest since worked
   first, so the one he did most recently is at the bottom.
 - Each movement has `measures` (from `Measure.ALL`: sets, reps, weight, time, band, resistance, speed,

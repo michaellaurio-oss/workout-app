@@ -219,7 +219,15 @@
     for (const s of strength) if (picked.length < 2 && !picked.includes(s) && s.ratio >= 0.75 && rested(s)) picked.push(s);
     const extras = this.active().filter((s) => s.area.kind !== "strength" && s.ratio >= 1)
       .sort((a, b) => b.ratio - a.ratio || (this.weekly ? longest(a, b) : 0));
+    // Every N days (as Recommend.kt): the cards are shown soonest deadline first. Weekly goals all end Saturday,
+    // so there the order stays most behind first.
+    if (!this.weekly) return this.byDeadline(picked).concat(this.byDeadline(extras));
     return picked.concat(extras);
+  };
+  /** Soonest deadline first (the day open credits run out, else days until due; never done first), then most overdue. */
+  Stats.prototype.byDeadline = function (list) {
+    const days = (s) => (s.partialCredits > 0 && s.daysLeft != null ? s.daysLeft : s.dueIn == null ? -Infinity : s.dueIn);
+    return list.slice().sort((a, b) => days(a) - days(b) || b.ratio - a.ratio);
   };
   /** When nothing is due: every area, longest since worked first. */
   Stats.prototype.allByRest = function () {
