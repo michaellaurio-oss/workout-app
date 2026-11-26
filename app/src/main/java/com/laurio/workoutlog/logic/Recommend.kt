@@ -18,6 +18,10 @@ data class LastDone(val date: String, val groups: List<SetGroup>, val note: Stri
  * counting starts over from zero after it (so the same credits never count twice).
  * [days] = days since the last reset (null = never). [partialCredits] = credits collected since then
  * that are still inside the period as of today; [partialDays] = days since the oldest of those.
+ * Fixed rhythm (his call, 2026-11-25): finishing early doesn't pull the schedule forward. The next due date
+ * counts from the old due date when he finished early, or from the day he finished when late (so a late
+ * period never makes him catch up). [scheduled] = days since that anchor (negative after an early finish);
+ * it drives [ratio] and [dueIn], while [days] stays the real days since he last finished the area.
  */
 data class AreaStatus(
     val area: Area,
@@ -28,6 +32,7 @@ data class AreaStatus(
     val status: Status,
     /** Today is a rest day: it doesn't count, so deadlines move out a day. */
     val restToday: Boolean = false,
+    val scheduled: Int? = days,
 ) {
     /** Credits still missing for the next reset. */
     val creditsShort: Double get() = (area.credits - partialCredits).coerceAtLeast(0.0)
@@ -36,7 +41,7 @@ data class AreaStatus(
     val daysLeft: Int? get() = partialDays?.let { area.target.coerceAtLeast(1) - it }
 
     /** Days until the area is due (0 = today, negative = overdue); null = never done. */
-    val dueIn: Int? get() = days?.let { area.target.coerceAtLeast(1) - it }
+    val dueIn: Int? get() = scheduled?.let { area.target.coerceAtLeast(1) - it }
 }
 
 data class Movement(val exercise: Exercise, val last: LastDone?)
@@ -86,22 +91,24 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
         val isRest = isRestDay(today.toEpochDay())
         areas = data.areas.map { a ->
             val target = a.target.coerceAtLeast(1)
-            val (resets, open) = walk(a)
-            val reset: Long? = resets.lastOrNull()
+            val w = walk(a)
+            val open = w.open
+            val reset: Long? = w.resets.lastOrNull()
             // On a rest day, credits whose last chance was the day before can't be completed any more.
             val cutoff = todayS - target + if (isRest) 1 else 0
             while (open.isNotEmpty() && scheduleDay(open.first().first) <= cutoff) open.removeFirst()
             val days = reset?.let { (todayS - scheduleDay(it)).toInt() }
+            val scheduled = w.anchors.lastOrNull()?.let { (todayS - it).toInt() }
             val partialCredits = open.sumOf { it.second }
             val partialDays = open.firstOrNull()?.let { (todayS - scheduleDay(it.first)).toInt() }
-            val ratio = if (days == null) 9.0 else days.toDouble() / target
+            val ratio = if (scheduled == null) 9.0 else scheduled.toDouble() / target
             val status = when {
                 days == null || ratio >= 2 -> Status.OVERDUE
                 ratio >= 1 -> Status.DUE
                 ratio >= 0.75 -> Status.SOON
                 else -> Status.FRESH
             }
-            AreaStatus(a, days, partialDays, partialCredits, ratio, status, isRest)
+            AreaStatus(a, days, partialDays, partialCredits, ratio, status, isRest, scheduled)
         }
     }
 
@@ -109,25 +116,39 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
      * Walks an area's credits oldest day first. Returns every day its credits reached the credits
      * needed (its clock reset), oldest first, and the credits still open after the last day.
      */
-    private fun walk(a: Area): Pair<List<Long>, ArrayDeque<Pair<Long, Double>>> {
+    private class Walk(val resets: List<Long>, val anchors: List<Long>, val open: ArrayDeque<Pair<Long, Double>>)
+
+    private fun walk(a: Area): Walk {
         val target = a.target.coerceAtLeast(1)
         val need = a.credits - 1e-9
         val resets = mutableListOf<Long>()
+        val anchors = mutableListOf<Long>()
+        var anchor: Long? = null
         val open = ArrayDeque<Pair<Long, Double>>()
         for ((day, credit) in byArea[a.id].orEmpty()) {
             val dayS = scheduleDay(day)
             while (open.isNotEmpty() && scheduleDay(open.first().first) <= dayS - target) open.removeFirst()
             open.addLast(day to credit)
             if (open.sumOf { it.second } >= need) {
+                // Fixed rhythm: early keeps the old due date as the start of the next period; on time or late starts it today.
+                val due = anchor?.plus(target)
+                anchor = if (due != null && dayS < due) due else dayS
                 resets.add(day)
+                anchors.add(anchor)
                 open.clear()
             }
         }
-        return resets to open
+        return Walk(resets, anchors, open)
     }
 
-    /** Every day [a] counted as worked (its clock reset), as epoch days, oldest first. Used by Insights. */
-    fun resetDays(a: Area): List<Long> = walk(a).first
+    /** Every day [a] counted as worked (its clock reset), as epoch days, oldest first. */
+    fun resetDays(a: Area): List<Long> = walk(a).resets
+
+    /**
+     * For Insights: each reset (epoch day) with the schedule day its next period counts from (fixed rhythm),
+     * so a day is on track while it's no more than the target past that anchor.
+     */
+    fun resetAnchors(a: Area): List<Pair<Long, Long>> = walk(a).let { w -> w.resets.zip(w.anchors) }
 
     /** Credits per area for one day. The same movement logged twice that day counts once. */
     fun creditsFor(s: com.laurio.workoutlog.data.Session): Map<String, Double> {

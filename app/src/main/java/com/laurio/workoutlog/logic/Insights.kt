@@ -121,20 +121,20 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
         val injury = data.sessions.filter { isInjury(it) }.map { LocalDate.parse(it.date).toEpochDay() }.toSet()
         return data.areas.map { a ->
             val target = a.target.coerceAtLeast(1)
-            val resets = stats.resetDays(a)
+            val resets = stats.resetAnchors(a)
             var i = 0
-            var last: Long? = null
+            var anchor: Long? = null // schedule day the current period counts from (fixed rhythm)
             var counted = 0
             var onTime = 0
             for (d in start..todayDay) {
-                while (i < resets.size && resets[i] <= d) last = resets[i++]
+                while (i < resets.size && resets[i].first <= d) anchor = resets[i++].second
                 if (d in injury || stats.isRestDay(d)) continue
                 counted++
-                val since = stats.scheduleDay(d) - stats.scheduleDay(last ?: first)
+                val since = stats.scheduleDay(d) - (anchor ?: stats.scheduleDay(first))
                 if (since <= target) onTime++
             }
             val pct = if (counted == 0) 0 else Math.round(onTime * 100.0 / counted).toInt()
-            AreaBalance(a, pct, resets.count { it in start..todayDay })
+            AreaBalance(a, pct, resets.count { it.first in start..todayDay })
         }.sortedWith(compareByDescending<AreaBalance> { it.onTimePct }.thenBy { it.area.label })
     }
 

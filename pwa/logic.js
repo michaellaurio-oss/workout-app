@@ -138,15 +138,17 @@
       const cutoff = todayS - target + (isRest ? 1 : 0);
       while (open.length && this.scheduleDay(open[0][0]) <= cutoff) open.shift();
       const days = reset == null ? null : todayS - this.scheduleDay(reset);
+      // Fixed rhythm (as Recommend.kt): due dates count from the period's anchor, not the day he finished.
+      const scheduled = w.anchors.length ? todayS - w.anchors[w.anchors.length - 1] : null;
       const partialCredits = open.reduce((t, x) => t + x[1], 0);
       const partialDays = open.length ? todayS - this.scheduleDay(open[0][0]) : null;
-      const ratio = days == null ? 9 : days / target;
+      const ratio = scheduled == null ? 9 : scheduled / target;
       const status = days == null || ratio >= 2 ? "OVERDUE" : ratio >= 1 ? "DUE" : ratio >= 0.75 ? "SOON" : "FRESH";
       return {
         area: a, days, partialDays, partialCredits, ratio, status, restToday: isRest,
         creditsShort: Math.max(0, a.credits - partialCredits),
         daysLeft: partialDays == null ? null : target - partialDays,
-        dueIn: days == null ? null : target - days,
+        dueIn: scheduled == null ? null : target - scheduled, scheduled,
       };
     });
   }
@@ -184,14 +186,21 @@
     const target = Math.max(1, a.target);
     const need = a.credits - 1e-9;
     const resets = [];
+    const anchors = [];
+    let anchor = null;
     let open = [];
     for (const [day, credit] of this.byArea[a.id] || []) {
       const dayS = this.scheduleDay(day);
       while (open.length && this.scheduleDay(open[0][0]) <= dayS - target) open.shift();
       open.push([day, credit]);
-      if (open.reduce((t, x) => t + x[1], 0) >= need) { resets.push(day); open = []; }
+      if (open.reduce((t, x) => t + x[1], 0) >= need) {
+        // Fixed rhythm: early keeps the old due date as the start of the next period; on time or late starts it today.
+        const due = anchor == null ? null : anchor + target;
+        anchor = due != null && dayS < due ? due : dayS;
+        resets.push(day); anchors.push(anchor); open = [];
+      }
     }
-    return { resets, open };
+    return { resets, anchors, open };
   };
   /** Credits per area for one day. The same movement logged twice that day counts once. */
   Stats.prototype.creditsFor = function (s) {

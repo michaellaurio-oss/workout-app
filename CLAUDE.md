@@ -15,7 +15,12 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   each movement logged on a day gives 1 credit to its main area and 0.5 to each area it also works (same
   movement twice in a day counts once; `MAIN_CREDIT`, `ALSO_CREDIT`, `Stats.creditsFor`). Credits **add up
   across days within the area's every-N-days period**; the day they reach the area's credits needed resets
-  its clock, and counting restarts from zero (credits never count toward two resets). An area-only log
+  its clock, and counting restarts from zero (credits never count toward two resets). **Fixed rhythm** (his
+  trial, 2026-11-25, to stop requirements stacking up): finishing early doesn't pull the schedule forward. The
+  next due date counts from the old due date if he finished early, or from the day he finished if late
+  (no catch-up). `walk` keeps each period's anchor; `AreaStatus.scheduled` (days since the anchor, negative
+  after an early finish) drives `ratio` and `dueIn`; `days` stays the real days since he last finished it.
+  Insights' on-track % uses the same anchors (`Stats.resetAnchors`). Same in `pwa/logic.js` (every-N-days mode). An area-only log
   ("upper") is a full reset. `AreaStatus.creditsShort` / `daysLeft` / `dueIn` feed the Next tab's
   "Need 1 more credit by Thu (1 of 2 so far)" / "Need 2 credits · due in 2 days" (`goalText`, `goalShort`
   in `logic/Format.kt`).
