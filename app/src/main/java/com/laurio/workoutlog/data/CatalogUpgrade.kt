@@ -5,7 +5,7 @@ package com.laurio.workoutlog.data
  * "catalogVersion"). Runs once per version bump, so edits he makes in the app afterwards stay.
  *
  * - Exercises in the new list replace the stored ones with the same id (name, areas, equipment,
- *   measures, hidden). New ones are added. Ones he added in the app are kept. The list carries
+ *   measures). One he deleted in the app stays deleted (hidden). New ones are added. Ones he added in the app are kept. The list carries
  *   dropped movements that history uses as hidden, so fresh installs still show their names.
  * - Ids listed in "retired" (dropped and never used) are hidden if a workout uses them, otherwise removed.
  * - "merged" maps an old id to the movement it was folded into: logged workouts move over and the
@@ -39,6 +39,7 @@ object CatalogUpgrade {
                 pinned = e.pinned || m.pinned,
                 months = e.months.ifEmpty { m.months },
                 video = e.video.ifBlank { m.video },
+                hidden = e.hidden || m.hidden, // deleted in the app stays deleted
             )
         }
         val listedIds = listed.map { it.id }.toSet()

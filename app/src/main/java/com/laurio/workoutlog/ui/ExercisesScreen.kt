@@ -63,6 +63,7 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
     val areaNames = remember(data) { data.areas.associate { it.id to it.label } }
     var editing by remember { mutableStateOf<Exercise?>(null) }
     var adding by remember { mutableStateOf(false) }
+    var showDeleted by rememberSaveable { mutableStateOf(false) }
     var importUri by remember { mutableStateOf<Uri?>(null) }
     var search by rememberSaveable { mutableStateOf("") }
     val q = search.trim().lowercase()
@@ -114,6 +115,37 @@ fun ExercisesScreen(data: AppData, vm: AppViewModel) {
                 areaNames = areaNames,
                 onEdit = { editing = it },
             )
+        }
+        // Deleted movements: hidden, never erased, so they can come back.
+        val deleted = data.exercises.filter { it.hidden }.sortedBy { it.name.lowercase() }
+        if (q.isEmpty() && deleted.isNotEmpty()) {
+            item {
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                    Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "DELETED MOVEMENTS (${deleted.size})", Modifier.weight(1f),
+                                style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
+                            )
+                            TextButton(onClick = { showDeleted = !showDeleted }) { Text(if (showDeleted) "Hide" else "Show") }
+                        }
+                        if (showDeleted) {
+                            deleted.forEach { e ->
+                                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(e.name, style = MaterialTheme.typography.bodyLarge)
+                                        Text(
+                                            listOfNotNull(areaNames[e.mainArea], stats.countEx[e.id]?.let { "logged $it×" }).joinToString(" · "),
+                                            style = MaterialTheme.typography.bodySmall, color = Muted,
+                                        )
+                                    }
+                                    TextButton(onClick = { vm.restoreExercise(e) }) { Text("Bring back") }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
@@ -242,8 +274,8 @@ private fun ExerciseDialog(
             title = { Text("Delete ${original.name}?") },
             text = {
                 Text(
-                    if (timesLogged > 0) "It's in $timesLogged logged workouts. Those stay in History; it just leaves the lists."
-                    else "It has never been logged.",
+                    (if (timesLogged > 0) "It's in $timesLogged logged workouts. Those stay in History; it just leaves the lists."
+                    else "It has never been logged.") + " You can bring it back from Deleted movements at the bottom of this tab.",
                 )
             },
             confirmButton = { TextButton(onClick = { onDelete(original) }) { Text("Delete", color = MaterialTheme.colorScheme.error) } },

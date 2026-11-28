@@ -310,13 +310,21 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Deletes a movement. If history uses it, it's hidden instead so old workouts still show its name. */
+    /**
+     * Deletes a movement: it's hidden, never erased, so old workouts keep its name, a list update can't bring
+     * it back, and he can bring it back himself from Deleted movements on the Exercises tab.
+     */
     fun removeExercise(e: Exercise) {
         picked.removeAll { it.ex == e.id }
         change("Removed ${e.name}") { d ->
-            val used = d.sessions.any { s -> s.items.any { it.ex == e.id } }
-            d.copy(exercises = if (used) d.exercises.map { if (it.id == e.id) it.copy(hidden = true) else it }
-            else d.exercises.filter { it.id != e.id })
+            d.copy(exercises = d.exercises.map { if (it.id == e.id) it.copy(hidden = true) else it })
+        }
+    }
+
+    /** Brings a deleted (hidden) movement back onto the lists. */
+    fun restoreExercise(e: Exercise) {
+        change("Brought back ${e.name}") { d ->
+            d.copy(exercises = d.exercises.map { if (it.id == e.id) it.copy(hidden = false) else it })
         }
     }
 

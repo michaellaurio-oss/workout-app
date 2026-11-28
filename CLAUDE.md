@@ -57,7 +57,9 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   History but gives no credits (and isn't a workout in Insights). After use the button hides for 3 days (the rest
   day + 2); on the rest day it shows "Rest day today" with Undo.
 - Area-only logs (`Session.areas`) exist for days he just writes "upper"/"lower".
-- Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
+- Deleting a movement only ever hides it (`Exercise.hidden`; 2026-11-27, both apps): old workouts keep its name, and
+  **Deleted movements** at the bottom of the Exercises tab lists them with **Bring back** (`restoreExercise`; web
+  `deletedCard`, hidden while searching). `CatalogUpgrade` keeps a movement he deleted hidden (`hidden = list || his`).
 
 - **Insights tab** (`ui/InsightsScreen.kt`): this week / avg per week (last 8 full weeks; a day counts if it has movements or areas, or tag "workout" = old log day with no details) / streak (weeks in a
   row with 3+ workouts; injury weeks skipped), 17-week heatmap, a **Last 10 periods** stoplight (his request,

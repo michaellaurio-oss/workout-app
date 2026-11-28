@@ -43,7 +43,6 @@
   function starter() { return WL.normData(JSON.parse(JSON.stringify(catalog))); }
 
   function listVersion() { return catalog ? Number(catalog.webCatalogVersion || catalog.catalogVersion) || 1 : 0; }
-  function isBuiltIn(id) { return !!catalog && catalog.exercises.some((x) => x.id === id); }
   /**
    * A newer built-in list (webCatalogVersion, separate from the Android app's catalogVersion): new movements
    * are added; built-in ones get the list's name, areas, measures and equipment unless they edited the movement
@@ -502,9 +501,11 @@
   function renderExercises() {
     const out = [h("div", null, h("h1", null, "Exercises"), h("div", { class: "sub" }, "Tap a movement to change it. Main area first, then areas it also works."))];
     const list = h("div", { style: "display:flex;flex-direction:column;gap:12px" });
+    let del = null; // Deleted movements card, hidden while searching
     function draw() {
       list.replaceChildren();
       const q = exSearch.trim().toLowerCase();
+      if (del) del.hidden = !!q;
       for (const a of data.areas) {
         const items = data.exercises.filter((e) => !e.hidden && e.areas[0] === a.id && (!q || e.name.toLowerCase().includes(q) || e.equip.toLowerCase().includes(q)))
           .sort((x, y) => (y.pinned - x.pinned) || x.name.localeCompare(y.name));
@@ -522,8 +523,10 @@
     }
     out.push(h("input", { type: "search", placeholder: "Search name or equipment", value: exSearch, oninput: (ev) => { exSearch = ev.target.value; draw(); } }));
     out.push(h("div", { class: "btns" }, h("button", { class: "btn primary", onclick: () => editExercise(null) }, "+ Add a movement")));
+    del = deletedCard();
     draw();
     out.push(list);
+    out.push(del);
     out.push(backupCard());
     return out;
   }
@@ -565,12 +568,14 @@
       const showDeleteButton = () => delRow.replaceChildren(h("button", { class: "btn text danger", onclick: askDelete }, "Delete movement"));
       function askDelete() {
         delRow.replaceChildren(
-          h("span", { class: "sub small" }, "Delete " + e.name + "?" + (used ? " Your history keeps its name." : "")),
+          h("span", { class: "sub small" }, "Delete " + e.name + "?" + (used ? " Your history keeps its name." : "") +
+            " You can bring it back from Deleted movements."),
           h("span", { class: "spacer" }),
           h("button", { class: "btn text", onclick: showDeleteButton }, "Keep"),
           h("button", { class: "btn danger", onclick: () => {
-            // Hidden, not removed, when history uses it or it's from the starting list (so a list update can't bring it back).
-            if (used || isBuiltIn(e.id)) e.hidden = true; else data.exercises = data.exercises.filter((x) => x !== e);
+            // Hidden, never erased: history keeps its name, a list update can't bring it back, and Deleted
+            // movements (bottom of the Exercises tab) can.
+            e.hidden = true;
             picked = picked.filter((p) => p.ex !== e.id);
             save(); close(); render(); toast("Deleted " + e.name + ".");
           } }, "Delete"));
@@ -608,6 +613,21 @@
         delRow,
       ];
     });
+  }
+
+  let showDeleted = false;
+  /** Deleted movements (hidden, never erased), each with Bring back. Shown when not searching. */
+  function deletedCard() {
+    const deleted = data.exercises.filter((e) => e.hidden).sort((a, b) => a.name.localeCompare(b.name));
+    if (!deleted.length) return null;
+    const st = stats();
+    return h("section", { class: "card" },
+      h("div", { class: "card-head" }, h("h2", { class: "card-title" }, "Deleted movements (" + deleted.length + ")"),
+        h("button", { class: "btn text", onclick: () => { showDeleted = !showDeleted; render(); } }, showDeleted ? "Hide" : "Show")),
+      showDeleted ? deleted.map((e) => h("div", { class: "row" },
+        h("div", { class: "grow" }, h("div", null, e.name),
+          h("div", { class: "sub small" }, [areaLabel(e.areas[0]), st.countEx[e.id] ? "logged " + st.countEx[e.id] + "×" : ""].filter(Boolean).join(" · "))),
+        h("button", { class: "btn text", onclick: () => { e.hidden = false; save(); render(); toast("Brought back " + e.name + "."); } }, "Bring back"))) : null);
   }
 
   function backupCard() {
