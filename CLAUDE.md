@@ -29,7 +29,7 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
   list) are shown **soonest deadline first** (`Stats.byDeadline`: open credits' `daysLeft`, else `dueIn`; never done
   first; ties by ratio), his call 2026-11-25. Which areas are picked still goes by ratio.
   When nothing is due, the Next tab shows every area instead (`Stats.allByRest`), longest since worked
-  first, so the one he did most recently is at the bottom.
+  first, so the one he did most recently is at the bottom; areas last done the same day go soonest deadline first.
 - Each movement has `measures` (from `Measure.ALL`: sets, reps, weight, time, band, resistance, speed,
   incline); the Log tab shows only those fields. A logged movement has one or more lines (`SetGroup`;
   weight in lb, time stored in seconds) plus a free note. Time is typed in minutes for cardio

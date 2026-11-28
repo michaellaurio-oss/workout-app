@@ -205,8 +205,11 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
      * When nothing is due, every area is offered, longest since worked first, so the area he
      * did most recently ends up at the bottom.
      */
-    fun allByRest(): List<AreaStatus> =
-        active().sortedWith(compareByDescending<AreaStatus> { it.days ?: Int.MAX_VALUE }.thenByDescending { it.ratio })
+    fun allByRest(): List<AreaStatus> = active().sortedWith(
+        compareByDescending<AreaStatus> { it.days ?: Int.MAX_VALUE }
+            .thenBy { deadlineDays(it) } // done the same day: the one due sooner first (his call, 2026-11-27)
+            .thenByDescending { it.ratio },
+    )
 
     /** His every-session routine (warmup etc.), in list order. Shown on Next whatever is due. */
     fun everySession(): List<Movement> = data.exercises

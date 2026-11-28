@@ -235,14 +235,18 @@
   };
   /** Soonest deadline first (the day open credits run out, else days until due; never done first), then most overdue. */
   Stats.prototype.byDeadline = function (list) {
-    const days = (s) => (s.partialCredits > 0 && s.daysLeft != null ? s.daysLeft : s.dueIn == null ? -Infinity : s.dueIn);
-    return list.slice().sort((a, b) => days(a) - days(b) || b.ratio - a.ratio);
+    return list.slice().sort((a, b) => deadlineDays(a) - deadlineDays(b) || b.ratio - a.ratio);
   };
+  /** Days to the deadline a card shows: open credits' last day, else days until due; never done = most urgent. */
+  function deadlineDays(s) {
+    if (s.partialCredits > 0 && s.daysLeft != null) return s.daysLeft;
+    return s.dueIn == null ? -Infinity : s.dueIn;
+  }
   /** When nothing is due: every area, longest since worked first. */
   Stats.prototype.allByRest = function () {
     return this.active().sort((a, b) => {
       const da = a.days == null ? Infinity : a.days, db = b.days == null ? Infinity : b.days;
-      return db - da || b.ratio - a.ratio;
+      return db - da || deadlineDays(a) - deadlineDays(b) || b.ratio - a.ratio; // same day: due sooner first
     });
   };
   Stats.prototype.everySession = function () {
