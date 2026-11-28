@@ -277,6 +277,133 @@
     return -(lo + 1);
   }
 
+  // ---------- Insights (web app: weeks run Sunday to Saturday, like the weekly goals) ----------
+
+  const STREAK_MIN = 3;
+  const STALE_DAYS = 30;
+  function sundayOf(day) { return addDays(day, -new Date(epochDay(day) * 86400000).getUTCDay()); }
+
+  /** The Insights tab, modeled on the Android app's (logic/Insights.kt) but in Sunday–Saturday weeks. */
+  function Insights(data, today, stats) {
+    this.data = data;
+    this.today = today;
+    this.stats = stats || new Stats(data, today, { weekly: true });
+    this.byDate = {};
+    for (const s of data.sessions) this.byDate[s.date] = s;
+    this.firstDay = data.sessions.length ? data.sessions.reduce((m, s) => (s.date < m ? s.date : m), data.sessions[0].date) : null;
+    this.thisSunday = sundayOf(today);
+  }
+  /** A day counts as a workout if it has movements or areas, or an old "workout" tag. */
+  Insights.prototype.isWorkout = function (s) { return !!s && (s.items.length > 0 || s.areas.length > 0 || s.tag === "workout"); };
+  Insights.prototype.isInjury = function (s) { return !!s && s.tag === "injury"; };
+  /** One heatmap cell: kind workout / injury / rest / future, and level 1–3 by how many movements. */
+  Insights.prototype.cell = function (date) {
+    if (date > this.today) return { date, kind: "future", level: 0 };
+    const s = this.byDate[date];
+    if (this.isWorkout(s)) {
+      const n = new Set(s.items.map((i) => i.ex)).size;
+      return { date, kind: "workout", level: n === 0 ? 2 : n <= 2 ? 1 : n <= 5 ? 2 : 3 };
+    }
+    return { date, kind: this.isInjury(s) ? "injury" : "rest", level: 0 };
+  };
+  /** The last [count] weeks, oldest first, each Sunday to Saturday, ending with this week. */
+  Insights.prototype.weeks = function (count) {
+    const out = [];
+    for (let w = count - 1; w >= 0; w--) {
+      const sun = addDays(this.thisSunday, -7 * w);
+      out.push([0, 1, 2, 3, 4, 5, 6].map((d) => this.cell(addDays(sun, d))));
+    }
+    return out;
+  };
+  Insights.prototype.workoutsInWeek = function (sun) {
+    let n = 0;
+    for (let d = 0; d < 7; d++) if (this.isWorkout(this.byDate[addDays(sun, d)])) n++;
+    return n;
+  };
+  Insights.prototype.injuryInWeek = function (sun) {
+    for (let d = 0; d < 7; d++) if (this.isInjury(this.byDate[addDays(sun, d)])) return true;
+    return false;
+  };
+  Insights.prototype.thisWeek = function () { return this.workoutsInWeek(this.thisSunday); };
+  /** Average workouts per full week over the last [weeks] weeks (not this one), or null if none yet. */
+  Insights.prototype.avgPerWeek = function (weeks) {
+    weeks = weeks || 8;
+    if (!this.firstDay) return null;
+    const first = sundayOf(this.firstDay);
+    const suns = [];
+    for (let w = 1; w <= weeks; w++) { const sun = addDays(this.thisSunday, -7 * w); if (sun >= first) suns.push(sun); }
+    if (!suns.length) return null;
+    return suns.reduce((t, sun) => t + this.workoutsInWeek(sun), 0) / suns.length;
+  };
+  /** Weeks in a row with [min]+ workouts. This week counts once it gets there; injury weeks are skipped. */
+  Insights.prototype.streak = function (min) {
+    min = min || STREAK_MIN;
+    if (!this.firstDay) return 0;
+    const first = sundayOf(this.firstDay);
+    let n = this.workoutsInWeek(this.thisSunday) >= min ? 1 : 0;
+    for (let sun = addDays(this.thisSunday, -7); sun >= first; sun = addDays(sun, -7)) {
+      if (this.workoutsInWeek(sun) >= min) n++;
+      else if (!this.injuryInWeek(sun)) break;
+    }
+    return n;
+  };
+  /**
+   * Stoplight: each area's last [count] weeks plus this week. fraction = credits that week ÷ the area's weekly
+   * goal (null = the week ended before the log starts). Same credits as the Next tab.
+   */
+  Insights.prototype.stoplight = function (count) {
+    count = count || 10;
+    const firstSun = this.firstDay ? epochDay(sundayOf(this.firstDay)) : epochDay(this.thisSunday);
+    const thisSun = epochDay(this.thisSunday);
+    return this.data.areas.map((a) => {
+      const credits = this.stats.byArea[a.id] || [];
+      const need = Math.max(0.5, a.perWeek);
+      const periods = [];
+      for (let k = count; k >= 0; k--) {
+        const from = thisSun - 7 * k;
+        const earned = credits.filter((x) => x[0] >= from && x[0] < from + 7).reduce((t, x) => t + x[1], 0);
+        periods.push({ fraction: from < firstSun ? null : earned / need, current: k === 0, week: fromEpoch(from) });
+      }
+      return { area: a, periods };
+    });
+  };
+  /** First day of a window of [days] days ending today (null days = since the first log). */
+  Insights.prototype.windowStart = function (days) {
+    if (!this.firstDay) return null;
+    if (days == null) return this.firstDay;
+    const start = addDays(this.today, -(days - 1));
+    return start < this.firstDay ? this.firstDay : start;
+  };
+  /** Movements done on the most days in the window (every-session routine left out). */
+  Insights.prototype.mostDone = function (days, limit) {
+    const start = this.windowStart(days);
+    if (!start) return [];
+    const counts = {};
+    for (const s of this.data.sessions) {
+      if (s.date < start || s.date > this.today) continue;
+      for (const id of new Set(s.items.map((i) => i.ex))) counts[id] = (counts[id] || 0) + 1;
+    }
+    return Object.keys(counts).map((id) => ({ exercise: this.stats.exById[id], days: counts[id] }))
+      .filter((m) => m.exercise && !m.exercise.everySession)
+      .sort((a, b) => b.days - a.days || cmp(a.exercise.name.toLowerCase(), b.exercise.name.toLowerCase()))
+      .slice(0, limit || 8);
+  };
+  Insights.prototype.offered = function (e) { return !e.hidden && !e.everySession && inSeason(e, monthOf(this.today)); };
+  /** Movements done before but not in the last [days] days, most recent first. */
+  Insights.prototype.stale = function (days) {
+    days = days || STALE_DAYS;
+    return this.data.exercises.filter((e) => this.offered(e) && this.stats.lastEx[e.id])
+      .map((e) => ({ exercise: e, daysAgo: this.stats.daysAgo(this.stats.lastEx[e.id].date) }))
+      .filter((m) => m.daysAgo >= days).sort((a, b) => a.daysAgo - b.daysAgo);
+  };
+  /** Movements on the list never logged, by area then name. */
+  Insights.prototype.neverDone = function () {
+    const order = {};
+    this.data.areas.forEach((a, i) => (order[a.id] = i));
+    return this.data.exercises.filter((e) => this.offered(e) && !this.stats.lastEx[e.id])
+      .sort((a, b) => ((order[a.areas[0]] ?? 99) - (order[b.areas[0]] ?? 99)) || cmp(a.name.toLowerCase(), b.name.toLowerCase()));
+  };
+
   // ---------- formatting ----------
 
   function num(d) { return Number.isInteger(d) ? String(d) : String(Math.round(d * 100) / 100); }
@@ -376,7 +503,7 @@
   const api = {
     MAIN_CREDIT, ALSO_CREDIT, DEFAULT_CREDITS, MEASURES, DEFAULT_MEASURES, MONTHS, STATUS, WEEK_STATUS, defaultPerWeek,
     todayStr, epochDay, addDays, weekday, monthOf, normData, normExercise, groupEmpty, inSeason, isResting, timeInMinutes,
-    Stats, prettyDate, ago, formatTime, parseTime, timeForField, formatMonths, formatGroup, formatDetail, goalText, goalShort, whyText,
+    Stats, Insights, STREAK_MIN, STALE_DAYS, sundayOf, prettyDate, ago, formatTime, parseTime, timeForField, formatMonths, formatGroup, formatDetail, goalText, goalShort, whyText,
     measureLabel, measureName, num,
   };
   root.WL = api;

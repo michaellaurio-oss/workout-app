@@ -109,8 +109,10 @@ Single-activity Jetpack Compose app, no DI, no database library (same pattern as
 - For a friend on iPhone with **their own log**: a home-screen web app published by GitHub Pages
   (`.github/workflows/pages.yml`, deploys `pwa/` on every push to main) at michaellaurio-oss.github.io/workout-app.
 - **Rule changes go in both apps**: `pwa/logic.js` is a straight port of `Recommend.kt` + `Format.kt` (credits,
-  windows, rest days, move down, focus, goal text), plus the web-only weekly mode below. Screens: `pwa/app.js` (Next, Log, History, Exercises, Areas;
-  no Insights yet). Data in localStorage in the same JSON shape as `AppData`, so backups open in either app.
+  windows, rest days, move down, focus, goal text), plus the web-only weekly mode below. Screens: `pwa/app.js` (Next, Log, History, Insights, Exercises,
+  Areas). Web Insights (`WL.Insights` in logic.js, `renderInsights`, 2026-11-27) is the Android tab in Sunday–Saturday
+  weeks: this week / avg / streak, 17-week heatmap, a Last 10 weeks stoplight against `perWeek`, most done
+  (4 wk / 8 wk / All), not done in 30+ days and never done; no on-schedule % (an every-N-days idea). Data in localStorage in the same JSON shape as `AppData`, so backups open in either app.
 - **Goals are per week in the web app** (his call, 2026-11-16; the friend found "every N days" confusing):
   `Area.perWeek` credits per calendar week, **Sunday–Saturday** (`Stats(data, today, {weekly:true})` →
   `weekAreas`). Same credit rules (1 main, ½ also-works). Status labels Done / On track / To do / Behind

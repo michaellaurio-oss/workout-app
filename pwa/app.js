@@ -18,6 +18,8 @@
   let logNote = "";
   let logSearch = "";
   let exSearch = "";
+  let insWindow = 1;          // Insights: 0 = 4 wk, 1 = 8 wk, 2 = All
+  let showNever = false;
   const expanded = new Set(); // Next: area cards showing every movement
   let openAreaId = null;      // Next: an area opened from the All areas list
   let scrollTo = null;
@@ -410,6 +412,92 @@
     ]);
   }
 
+  // ---------- Insights ----------
+  const WINDOWS = [["4 wk", 28], ["8 wk", 56], ["All", null]];
+  const LIGHT = { done: "var(--fresh)", half: "var(--soon)", low: "var(--overdue)" };
+
+  function renderInsights() {
+    const st = stats();
+    const ins = new WL.Insights(data, today, st);
+    const out = [h("div", null, h("h1", null, "Insights"),
+      h("div", { class: "sub" }, ins.firstDay ? "Since " + WL.prettyDate(ins.firstDay, today) : "Nothing logged yet. Log a workout and this fills in."))];
+    if (!ins.firstDay) return out;
+
+    // Consistency: this week, average, streak, then the calendar
+    const avg = ins.avgPerWeek();
+    out.push(h("section", { class: "card" },
+      h("div", { class: "statrow" },
+        stat("This week", String(ins.thisWeek())),
+        stat("Avg / week", avg == null ? "–" : avg.toFixed(1)),
+        stat("Streak", ins.streak() + " wk")),
+      h("div", { class: "sub small" }, "Weeks run Sunday to Saturday. Avg is the last 8 full weeks. Streak = weeks in a row with " +
+        WL.STREAK_MIN + "+ workouts."),
+      heatmap(ins.weeks(17))));
+
+    // Stoplight: last 10 weeks per area against its weekly goal
+    out.push(h("div", { class: "section" }, "Last 10 weeks"));
+    out.push(h("section", { class: "card" },
+      h("div", { class: "sub small" }, "One square per week, oldest on the left; the outlined square is this week. " +
+        "Green = weekly goal reached, yellow = half or more, red = less than half."),
+      ins.stoplight().map((row) => h("div", { class: "lightrow" },
+        h("span", { class: "name" }, row.area.label),
+        h("div", { class: "lights" }, row.periods.map((p) => {
+          const f = p.fraction;
+          const color = f == null ? null : f >= 1 - 1e-9 ? LIGHT.done : f >= 0.5 ? LIGHT.half : LIGHT.low;
+          const title = "Week of " + WL.prettyDate(p.week, today) + (f == null ? "" : ": " + Math.round(f * 100) + "% of goal");
+          return h("span", { class: "light" + (p.current ? " now" : "") + (color ? "" : " none"), title,
+            style: color ? (p.current ? "border-color:" + color + ";background:color-mix(in srgb, " + color + " 25%, transparent)" : "background:" + color) : null });
+        }))))));
+
+    // Window picker, most done, not done lately
+    out.push(h("div", { class: "chips" }, WINDOWS.map(([label], i) =>
+      h("button", { class: "chip" + (i === insWindow ? " on" : ""), onclick: () => { insWindow = i; render(); } }, label))));
+    const most = ins.mostDone(WINDOWS[insWindow][1]);
+    const top = most.length ? most[0].days : 1;
+    out.push(h("div", { class: "section" }, "Most done"));
+    out.push(h("section", { class: "card" },
+      most.length ? null : h("div", { class: "muted" }, "No movements logged in this window."),
+      most.map((m) => h("div", { class: "row tap", onclick: () => progress(m.exercise.id) },
+        h("div", { class: "grow" }, h("div", { class: "btns" }, h("span", { class: "grow" }, m.exercise.name),
+          h("span", { class: "sub" }, m.days + " day" + (m.days === 1 ? "" : "s"))),
+          h("div", { class: "bar", style: "margin-top:6px" }, h("div", { style: "width:" + (m.days / top) * 100 + "%;background:var(--accent)" })))))));
+
+    const stale = ins.stale();
+    const never = ins.neverDone();
+    out.push(h("div", { class: "section" }, "Not done in " + WL.STALE_DAYS + "+ days"));
+    out.push(h("section", { class: "card" },
+      stale.length ? null : h("div", { class: "muted" }, "Nothing here: every movement you've done came up in the last " + WL.STALE_DAYS + " days."),
+      stale.map((m) => h("div", { class: "row tap", onclick: () => progress(m.exercise.id) },
+        h("div", { class: "grow" }, h("div", null, m.exercise.name), h("div", { class: "sub small" }, areaLabel(m.exercise.areas[0]))),
+        h("span", { class: "sub s-SOON" }, WL.ago(m.daysAgo)))),
+      never.length ? h("div", { class: "btns" }, h("button", { class: "btn text", onclick: () => { showNever = !showNever; render(); } },
+        (showNever ? "Hide" : "Show") + " never done (" + never.length + ")")) : null,
+      showNever ? never.map((e) => h("div", { class: "row" },
+        h("div", { class: "grow" }, h("div", null, e.name), h("div", { class: "sub small" }, areaLabel(e.areas[0]))),
+        h("span", { class: "never" }, "never"))) : null));
+    return out;
+  }
+
+  function stat(label, value) {
+    return h("div", { class: "stat" }, h("div", { class: "statval" }, value), h("div", { class: "sub small" }, label));
+  }
+
+  /** 17 columns of weeks (oldest left), Sunday at the top; brighter = more movements that day. */
+  function heatmap(weeks) {
+    const grid = h("div", { class: "heat" });
+    for (const week of weeks) {
+      const col = h("div", { class: "heatcol" });
+      for (const c of week) {
+        const cls = c.kind === "workout" ? "w" + c.level : c.kind;
+        col.append(h("span", { class: "hc " + cls, title: WL.prettyDate(c.date, today) }));
+      }
+      grid.append(col);
+    }
+    return h("div", null, grid, h("div", { class: "sub small heatkey" },
+      h("span", { class: "hc rest" }), " rest ", h("span", { class: "hc w1" }), h("span", { class: "hc w2" }), h("span", { class: "hc w3" }),
+      " workout (more movements = brighter) ", h("span", { class: "hc injury" }), " injury"));
+  }
+
   // ---------- Exercises ----------
   function renderExercises() {
     const out = [h("div", null, h("h1", null, "Exercises"), h("div", { class: "sub" }, "Tap a movement to change it. Main area first, then areas it also works."))];
@@ -585,7 +673,7 @@
   }
   function render() {
     const y = window.scrollY;
-    const screens = { next: renderNext, log: renderLog, history: renderHistory, exercises: renderExercises, areas: renderAreas };
+    const screens = { next: renderNext, log: renderLog, history: renderHistory, insights: renderInsights, exercises: renderExercises, areas: renderAreas };
     $("#screen").replaceChildren(...[].concat(screens[tab]()).flat().filter(Boolean));
     renderTabs();
     window.scrollTo(0, y);
