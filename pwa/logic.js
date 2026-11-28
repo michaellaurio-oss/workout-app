@@ -356,7 +356,7 @@
     if (s.weekly) return s.short <= 1e-9 ? "done" : num(s.short) + " short · " + (s.daysLeft <= 1 ? "today" : s.daysLeft + " d left");
     if (s.daysLeft != null && s.partialCredits > 0) return num(s.creditsShort) + " short · " + deadline(s.daysLeft, today);
     const due = s.dueIn;
-    return num(s.area.credits) + " short · " + (due == null ? "never" : due > 0 ? "in " + due + " d" : due === 0 ? "today" : -due + " d late");
+    return num(s.area.credits) + " short · " + (due == null ? "never" : due === 1 ? "tomorrow" : due > 0 ? "in " + due + " d" : due === 0 ? "today" : -due + " d late");
   }
   function whyText(s) {
     if (s.weekly) return [s.days == null ? "not worked yet" : "last worked " + ago(s.days), "goal " + creditWord(s.need) + " a week, Sun–Sat"].join(" · ");

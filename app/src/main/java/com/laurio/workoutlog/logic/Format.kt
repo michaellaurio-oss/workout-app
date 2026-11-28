@@ -140,6 +140,7 @@ fun goalShort(s: AreaStatus, today: LocalDate = LocalDate.now()): String {
     val due = s.dueIn
     return "${formatWeight(s.area.credits)} short · " + when {
         due == null -> "never"
+        due == 1 -> "tomorrow" // same word as the cards, not "in 1 d"
         due > 0 -> "in $due d"
         due == 0 -> "today"
         else -> "${-due} d late"
