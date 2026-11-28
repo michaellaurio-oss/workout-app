@@ -141,6 +141,9 @@ class Stats(val data: AppData, val today: LocalDate = LocalDate.now()) {
         return Walk(resets, anchors, open)
     }
 
+    /** Credits [areaId] got per day (epoch day, rest days left out), oldest first. Used by Insights' stoplight. */
+    fun creditDays(areaId: String): List<Pair<Long, Double>> = byArea[areaId].orEmpty()
+
     /** Every day [a] counted as worked (its clock reset), as epoch days, oldest first. */
     fun resetDays(a: Area): List<Long> = walk(a).resets
 

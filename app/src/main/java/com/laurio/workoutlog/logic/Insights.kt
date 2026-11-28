@@ -20,6 +20,15 @@ data class DayCell(val date: LocalDate, val kind: DayKind, val level: Int)
  */
 data class AreaBalance(val area: Area, val onTimePct: Int, val times: Int)
 
+/**
+ * One square of an area's stoplight: credits earned in an every-N-days period ÷ credits needed.
+ * [fraction] null = the period ended before the log starts. [current] = the period he's in now.
+ */
+data class Period(val fraction: Double?, val current: Boolean)
+
+/** An area's last periods, oldest first; the last one is the current period. */
+data class AreaStoplight(val area: Area, val periods: List<Period>)
+
 /** A movement and how many days it was done in the window. */
 data class MovementCount(val exercise: Exercise, val days: Int)
 
@@ -112,6 +121,33 @@ class Insights(val data: AppData, val today: LocalDate = LocalDate.now()) {
         if (days == null) return first
         val start = today.minusDays((days - 1).toLong())
         return if (start.isBefore(first)) first else start
+    }
+
+    /**
+     * Stoplight: each area's last [count] every-N-days periods plus the current one. Periods line up with the
+     * fixed rhythm: periods are a target long, counted from the last anchor (or ending today if the area was
+     * never done); the current one is the period holding today. A period is (from, to] in schedule days, so the day he
+     * finished an area counts toward the period it finished. Areas in their usual order.
+     */
+    fun stoplight(count: Int = 10): List<AreaStoplight> {
+        val todayS = stats.scheduleDay(todayDay)
+        val firstS = firstDay?.let { stats.scheduleDay(it.toEpochDay()) } ?: todayS
+        return data.areas.map { a ->
+            val t = a.target.coerceAtLeast(1).toLong()
+            // The current period is the one holding today: step from the last anchor in whole periods
+            // (forward when overdue, back when he finished early and the next period hasn't started yet).
+            val anchor = stats.resetAnchors(a).lastOrNull()?.second ?: todayS
+            val start = anchor + Math.floorDiv(todayS - anchor - 1, t) * t
+            val credits = stats.creditDays(a.id).map { stats.scheduleDay(it.first) to it.second }
+            fun earned(from: Long, to: Long) = credits.filter { it.first > from && it.first <= to }.sumOf { it.second }
+            val need = a.credits.coerceAtLeast(0.5)
+            val past = (count downTo 1).map { k ->
+                val from = start - k * t
+                val to = from + t
+                Period(if (to < firstS) null else earned(from, to) / need, current = false)
+            }
+            AreaStoplight(a, past + Period(earned(start, start + t) / need, current = true))
+        }
     }
 
     /** Each area's share of days on schedule in the window, best first. */

@@ -60,7 +60,11 @@ Explain build and install steps plainly; he is not a day-to-day Android develope
 - Deleting a movement that history uses only hides it (`Exercise.hidden`), so old workouts keep its name.
 
 - **Insights tab** (`ui/InsightsScreen.kt`): this week / avg per week (last 8 full weeks; a day counts if it has movements or areas, or tag "workout" = old log day with no details) / streak (weeks in a
-  row with 3+ workouts; injury weeks skipped), 17-week heatmap, then for a 4 wk / 8 wk / All window: each area's
+  row with 3+ workouts; injury weeks skipped), 17-week heatmap, a **Last 10 periods** stoplight (his request,
+  2026-11-27; `Insights.stoplight`, `StoplightRow`): per area, 10 every-N-days periods plus the current one (outlined),
+  green = all credits needed, yellow = half or more, red = less, gray = before the log; periods are `target` long,
+  aligned to the fixed-rhythm anchor, (from, to] so the finishing day counts for the period it finished,
+  then for a 4 wk / 8 wk / All window: each area's
   % of days on track with its every-N-days target, best first (same credit rules as Next; injury days left out), most-done
   movements, and movements not done in 30+ days, most recent first (plus never-done). Tapping a movement there or in History opens
   `ProgressDialog`: heaviest weight per day (else most reps, else longest time) with the best marked, plus every day logged.

@@ -2,6 +2,7 @@ package com.laurio.workoutlog.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,10 +46,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.laurio.workoutlog.data.AppData
 import com.laurio.workoutlog.logic.AreaBalance
+import com.laurio.workoutlog.logic.AreaStoplight
 import com.laurio.workoutlog.logic.DayCell
 import com.laurio.workoutlog.logic.DayKind
 import com.laurio.workoutlog.logic.Insights
@@ -87,6 +90,7 @@ fun InsightsScreen(data: AppData, today: java.time.LocalDate) {
     val balance = remember(ins, window) { ins.balance(window) }
     val most = remember(ins, window) { ins.mostDone(window) }
     val stale = remember(ins) { ins.stale() }
+    val lights = remember(ins) { ins.stoplight() }
     val never = remember(ins) { ins.neverDone() }
     val areaNames = remember(data) { data.areas.associate { it.id to it.label } }
     val cs = MaterialTheme.colorScheme
@@ -115,6 +119,22 @@ fun InsightsScreen(data: AppData, today: java.time.LocalDate) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Heatmap(ins.weeks(HEATMAP_WEEKS))
+            }
+        }
+
+        // Stoplight: last 10 periods per area
+        item {
+            Column {
+                SectionLabel("Last 10 periods")
+                InsightCard {
+                    Text(
+                        "One square per every-N-days period, oldest on the left; the outlined square is the period you're in now. " +
+                            "Green = all the credits it needed, yellow = half or more, red = less than half.",
+                        style = MaterialTheme.typography.bodySmall, color = Muted,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    lights.forEach { StoplightRow(it) }
+                }
             }
         }
 
@@ -226,6 +246,35 @@ private fun FillBar(fraction: Float, color: Color) {
             .background(MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Box(Modifier.fillMaxHeight().fillMaxWidth(fraction.coerceIn(0f, 1f)).background(color))
+    }
+}
+
+/** One area: its label, then a square per period (green / yellow / red; gray before the log starts). */
+@Composable
+private fun StoplightRow(s: AreaStoplight) {
+    val empty = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f)
+    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            s.area.label, Modifier.width(104.dp), style = MaterialTheme.typography.bodyMedium,
+            maxLines = 2, overflow = TextOverflow.Ellipsis, // "Glutes & Hamstrings" wraps rather than being cut off
+        )
+        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            s.periods.forEach { p ->
+                val f = p.fraction
+                val color = when {
+                    f == null -> empty
+                    f >= 1.0 - 1e-9 -> statusColors(Status.FRESH).first
+                    f >= 0.5 -> statusColors(Status.SOON).first
+                    else -> statusColors(Status.OVERDUE).first
+                }
+                val shape = RoundedCornerShape(3.dp)
+                val box = Modifier.weight(1f).aspectRatio(1f).clip(shape)
+                Box(
+                    if (p.current) box.border(2.dp, color, shape).background(color.copy(alpha = 0.25f))
+                    else box.background(color),
+                )
+            }
+        }
     }
 }
 
